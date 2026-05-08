@@ -1,0 +1,27 @@
+{layout name="layout/main" /}
+<style>
+    html, body {height:100%;overflow:auto;background:#f5f7fb;}
+    .warning-center-view-card {min-height:100%;}
+    .warning-center-view-card .layui-card-body {max-height:calc(100vh - 90px);overflow-y:auto;box-sizing:border-box;}
+    @media (max-width:640px) {
+        .warning-center-view-card .layui-form-label {width:auto;float:none;display:block;margin-bottom:8px;}
+        .warning-center-view-card .layui-input-block {margin-left:0;}
+    }
+</style>
+<div class="layui-card warning-center-view-card">
+    <div class="layui-card-header"><h3 class="layui-card-title">查看教务预警</h3></div>
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane">
+            <div class="layui-form-item"><label class="layui-form-label">预警编号</label><div class="layui-input-block"><input type="text" value="{$formData.warning_no|default=''}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">预警标题</label><div class="layui-input-block"><input type="text" value="{$formData.warning_title|default=''}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">预警分类</label><div class="layui-input-block"><input type="text" value="{$formData.warning_category_text|default=''}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">预警等级</label><div class="layui-input-block"><input type="text" value="{$formData.warning_level_text|default=''}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">来源类型</label><div class="layui-input-block"><input type="text" value="{$formData.warning_source_type|default=''}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">来源业务ID</label><div class="layui-input-block"><input type="text" value="{$formData.source_id|default='0'}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">处理状态</label><div class="layui-input-block"><input type="text" value="{$formData.warning_status_text|default=''}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item layui-form-text"><label class="layui-form-label">预警内容</label><div class="layui-input-block"><textarea class="layui-textarea" readonly>{$formData.warning_content|default=''}</textarea></div></div>
+            <div class="layui-form-item layui-form-text"><label class="layui-form-label">处理备注</label><div class="layui-input-block"><textarea class="layui-textarea" readonly>{$formData.handle_remark|default=''}</textarea></div></div>
+            <div class="layui-form-item"><div class="layui-input-block"><button type="button" class="layui-btn layui-btn-primary" onclick="parent.layer.closeAll()"><i class="layui-icon layui-icon-close"></i> 关闭</button></div></div>
+        </form>
+    </div>
+</div>

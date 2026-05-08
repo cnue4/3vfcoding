@@ -1,0 +1,287 @@
+{layout name="layout/main" /}
+<style>
+    #table + .layui-table-view .layui-table-tool-temp {
+        display: flex;
+        align-items: flex-end;
+        gap: 8px;
+        flex-wrap: wrap;
+        padding-right: 0;
+    }
+
+    #table + .layui-table-view .layui-table-tool-self {
+        position: static;
+        float: none;
+        margin: 0;
+        display: inline-flex;
+        align-items: flex-end;
+        align-self: flex-end;
+    }
+
+    #table + .layui-table-view .layui-table-tool-self .layui-inline {
+        margin: 0;
+    }
+
+    #table + .layui-table-view .layui-table-tool-self .layui-btn-container {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+    }
+
+    #table + .layui-table-view .layui-table-tool-self .layui-btn-container > * + * {
+        margin-left: 8px;
+    }
+
+    #table + .layui-table-view .layui-table-tool-self .layui-inline + .layui-inline,
+    #table + .layui-table-view .layui-table-tool-self .layui-btn + .layui-btn {
+        margin-left: 8px;
+    }
+
+    #table + .layui-table-view .layui-table-tool-self .layui-btn {
+        height: 30px;
+        line-height: 30px;
+        padding: 0 10px;
+        margin: 0;
+    }
+
+    #table + .layui-table-view .layui-table-tool-self .layui-btn .layui-icon {
+        margin-right: 4px;
+    }
+
+    .table-batch-delete-disabled {
+        opacity: .45;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+</style>
+<div class="layui-card">
+    <div class="layui-card-header">
+        <h3 class="layui-card-title">教具申请</h3>
+    </div>
+
+    <div class="layui-card-body">
+        <div class="layui-form layui-form-pane" lay-filter="search">
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">搜索</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="keyword" placeholder="请输入申请编号、教具名称、用途或备注" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <button class="layui-btn layui-btn-primary" lay-submit lay-filter="search">
+                        <i class="layui-icon layui-icon-search"></i> 搜索
+                    </button>
+                    <button class="layui-btn layui-btn-primary" lay-submit lay-filter="reset">
+                        <i class="layui-icon layui-icon-refresh"></i> 重置
+                    </button>
+                </div>
+            </div>
+        </div>
+        <table class="layui-hide" id="table" lay-filter="table"></table>
+    </div>
+</div>
+
+<script type="text/html" id="toolbar">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm" lay-event="add">
+            <i class="layui-icon layui-icon-add-circle"></i> 申请教具
+        </button>
+        <button class="layui-btn layui-btn-sm layui-btn-danger table-batch-delete-disabled" lay-event="batchDelete" id="teachingAidBatchDeleteBtn">
+            <i class="layui-icon layui-icon-delete"></i> 批量删除
+        </button>
+    </div>
+</script>
+
+<script type="text/html" id="status">
+    {{# if(d.status == 0){ }}
+    <span class="layui-badge layui-bg-gray">待审批</span>
+    {{# } else if(d.status == 1){ }}
+    <span class="layui-badge layui-bg-green">已通过</span>
+    {{# } else if(d.status == 2){ }}
+    <span class="layui-badge layui-bg-red">已拒绝</span>
+    {{# } else if(d.status == 3){ }}
+    <span class="layui-badge layui-bg-cyan">已采购</span>
+    {{# } else { }}
+    <span class="layui-badge layui-bg-blue">已领取</span>
+    {{# } }}
+</script>
+
+<script type="text/html" id="action">
+    {{# if(d.status == 0){ }}
+    <button class="layui-btn layui-btn-xs layui-btn-normal" lay-event="edit">编辑</button>
+    <button class="layui-btn layui-btn-xs layui-btn-warm" lay-event="approve">审批</button>
+    {{# } }}
+    <button class="layui-btn layui-btn-xs layui-btn-danger" lay-event="delete">删除</button>
+</script>
+
+<script>
+    layui.use(['table', 'form', 'layer'], function() {
+        var table = layui.table;
+        var form = layui.form;
+        var layer = layui.layer;
+        var tableId = 'TeachingAidTable';
+
+        function relocateDefaultToolbar() {
+            var $tableView = $('#table').next('.layui-table-view');
+            var $toolbar = $tableView.find('.layui-table-tool-self');
+            var $anchor = $('#teachingAidBatchDeleteBtn');
+            if (!$tableView.length || !$toolbar.length || !$anchor.length) {
+                return;
+            }
+            $toolbar.insertAfter($anchor);
+        }
+
+        function reloadTable(resetPage) {
+            var options = {};
+            if (resetPage) {
+                options.page = {curr: 1};
+            }
+            table.reload(tableId, options);
+        }
+
+        function openForm(title, url, area) {
+            layer.open({
+                type: 2,
+                title: title,
+                content: url,
+                area: area || ['900px', '550px'],
+                end: function() {
+                    reloadTable(false);
+                }
+            });
+        }
+
+        function updateBatchDeleteButtonState() {
+            var selected = table.checkStatus(tableId).data || [];
+            $('#teachingAidBatchDeleteBtn').toggleClass('table-batch-delete-disabled', !selected.length);
+        }
+
+        function deleteItems(ids, done, options) {
+            options = options || {};
+            $.post('/backend/edu/teaching_aid/delete', {ids: ids.join(',')}, function(res) {
+                if (res.code === 1) {
+                    layer.msg(options.successText || res.msg || '删除成功', {icon: 1}, function() {
+                        reloadTable(false);
+                        updateBatchDeleteButtonState();
+                        if (typeof done === 'function') done(true);
+                    });
+                } else {
+                    layer.msg((res && res.msg) || '删除失败', {icon: 2});
+                    if (typeof done === 'function') done(false);
+                }
+            }, 'json').fail(function() {
+                layer.msg('删除失败，请稍后重试', {icon: 2});
+                if (typeof done === 'function') done(false);
+            });
+        }
+
+        table.render({
+            elem: '#table',
+            id: tableId,
+            url: '/backend/edu/teaching_aid/index',
+            method: 'get',
+            parseData: function(res) {
+                if (res && Number(res.code) !== 0) {
+                    layer.msg((res && res.msg) || '请求异常', {icon: 2});
+                    return {
+                        code: Number(res.code || 1),
+                        msg: res.msg || '请求异常',
+                        count: 0,
+                        data: []
+                    };
+                }
+                return res;
+            },
+            toolbar: '#toolbar',
+            defaultToolbar: ['filter', 'exports', 'print'],
+            cols: [[
+                {type: 'checkbox'},
+                {field: 'id', title: 'ID', width: 80},
+                {field: 'apply_no', title: '申请编号', width: 150},
+                {field: 'item_name', title: '教具名称', minWidth: 160},
+                {field: 'quantity', title: '数量', width: 90},
+                {field: 'purpose', title: '用途说明', minWidth: 220},
+                {field: 'need_time', title: '需求日期', width: 130},
+                {field: 'teacher', title: '申请教师', minWidth: 140, templet: function(d) {
+                    return (d.teacher && d.teacher.username) ? d.teacher.username : (d.teacher_name || d.teacher_id || '');
+                }},
+                {field: 'status', title: '状态', width: 120, templet: '#status'},
+                {field: 'apply_time', title: '申请时间', width: 180},
+                {toolbar: '#action', title: '操作', width: 180, fixed: 'right'}
+            ]],
+            page: true,
+            limit: 10,
+            limits: [10, 20, 30, 50],
+            text: {none: '暂无数据'},
+            done: function() {
+                updateBatchDeleteButtonState();
+                relocateDefaultToolbar();
+            }
+        });
+
+        table.on('toolbar(table)', function(obj) {
+            var event = obj.event;
+            if (event === 'add') {
+                openForm('申请教具', '/backend/edu/teaching_aid/add');
+            } else if (event === 'batchDelete') {
+                var selected = table.checkStatus(tableId).data || [];
+                if (!selected.length) {
+                    updateBatchDeleteButtonState();
+                    return;
+                }
+                var ids = selected.map(function(item) { return item.id; });
+                layer.confirm('确定要批量删除选中的 ' + ids.length + ' 条教具申请吗？', function(index) {
+                    deleteItems(ids, function() {
+                        layer.close(index);
+                    }, {successText: '已删除 ' + ids.length + ' 条数据'});
+                });
+            }
+        });
+
+        table.on('checkbox(table)', function() {
+            updateBatchDeleteButtonState();
+        });
+
+        table.on('tool(table)', function(obj) {
+            var event = obj.event;
+            var data = obj.data;
+            if (event === 'edit') {
+                openForm('编辑申请', '/backend/edu/teaching_aid/edit?id=' + data.id);
+            } else if (event === 'approve') {
+                openForm('审批教具申请', '/backend/edu/teaching_aid/approve?id=' + data.id, ['900px', '600px']);
+            } else if (event === 'delete') {
+                layer.confirm('确定要删除该申请吗？', function(index) {
+                    deleteItems([data.id], function() {
+                        layer.close(index);
+                    });
+                });
+            }
+        });
+
+        form.on('submit(search)', function(data) {
+            table.reload(tableId, { where: data.field, page: {curr: 1} });
+            return false;
+        });
+
+        form.on('submit(reset)', function() {
+            form.val('search', { keyword: '' });
+            table.reload(tableId, { where: {}, page: {curr: 1} });
+            return false;
+        });
+
+        window.addEventListener('focus', function() {
+            reloadTable(false);
+        });
+
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                reloadTable(false);
+            }
+        });
+
+        window.__refreshTeachingAidTable = function(resetPage) {
+            reloadTable(!!resetPage);
+        };
+    });
+</script>

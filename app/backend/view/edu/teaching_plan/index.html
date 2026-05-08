@@ -1,0 +1,322 @@
+{layout name="layout/main" /}
+<style>
+    #table + .layui-table-view .layui-table-tool-temp {
+        display: flex;
+        align-items: flex-end;
+        gap: 8px;
+        flex-wrap: wrap;
+        padding-right: 0;
+    }
+
+    #table + .layui-table-view .layui-table-tool-self {
+        position: static;
+        float: none;
+        margin: 0;
+        display: inline-flex;
+        align-items: flex-end;
+        align-self: flex-end;
+    }
+
+    #table + .layui-table-view .layui-table-tool-self .layui-inline {
+        margin: 0;
+    }
+
+    #table + .layui-table-view .layui-table-tool-self .layui-btn-container {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+    }
+
+    #table + .layui-table-view .layui-table-tool-self .layui-btn-container > * + * {
+        margin-left: 8px;
+    }
+
+    #table + .layui-table-view .layui-table-tool-self .layui-inline + .layui-inline,
+    #table + .layui-table-view .layui-table-tool-self .layui-btn + .layui-btn {
+        margin-left: 8px;
+    }
+
+    #table + .layui-table-view .layui-table-tool-self .layui-btn {
+        height: 30px;
+        line-height: 30px;
+        padding: 0 10px;
+        margin: 0;
+    }
+
+    #table + .layui-table-view .layui-table-tool-self .layui-btn .layui-icon {
+        margin-right: 4px;
+    }
+
+    .table-batch-delete-disabled {
+        opacity: .45;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    .teaching-plan-action-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: nowrap;
+    }
+
+    .teaching-plan-action-group .layui-btn {
+        margin: 0;
+    }
+
+    @media (max-width: 768px) {
+        .teaching-plan-action-group {
+            flex-wrap: wrap;
+        }
+
+        .teaching-plan-action-group .layui-btn {
+            flex: 1 1 calc(50% - 8px);
+        }
+    }
+</style>
+
+<div class="layui-card">
+    <div class="layui-card-header">
+        <h3 class="layui-card-title">教案资料库</h3>
+    </div>
+
+    <div class="layui-card-body">
+        <div class="layui-form layui-form-pane" lay-filter="teaching-plan-search">
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">搜索</label>
+                    <div class="layui-input-inline" style="width: 260px;">
+                        <input type="text" name="keyword" value="" placeholder="请输入标题、文件名、课程或教师" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <button class="layui-btn layui-btn-primary" lay-submit lay-filter="search">
+                        <i class="layui-icon layui-icon-search"></i> 搜索
+                    </button>
+                    <button class="layui-btn layui-btn-primary" lay-submit lay-filter="reset">
+                        <i class="layui-icon layui-icon-refresh"></i> 重置
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <table class="layui-hide" id="table" lay-filter="table"></table>
+    </div>
+</div>
+
+<script type="text/html" id="toolbar">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm" lay-event="add">
+            <i class="layui-icon layui-icon-add-circle"></i> 上传教案
+        </button>
+        <button class="layui-btn layui-btn-sm layui-btn-danger table-batch-delete-disabled" lay-event="batchDelete" id="teachingPlanBatchDeleteBtn">
+            <i class="layui-icon layui-icon-delete"></i> 批量删除
+        </button>
+    </div>
+</script>
+
+<script type="text/html" id="status">
+    {{# if(d.status == 1){ }}
+    <span class="layui-badge layui-bg-green">正常</span>
+    {{# } else { }}
+    <span class="layui-badge layui-bg-gray">禁用</span>
+    {{# } }}
+</script>
+
+<script type="text/html" id="category">
+    {{# if(d.category_id == 1){ }}
+    <span class="layui-badge layui-bg-green">课程教案</span>
+    {{# } else if(d.category_id == 2) { }}
+    <span class="layui-badge layui-bg-orange">课程大纲</span>
+    {{# } else if(d.category_id == 3) { }}
+    <span class="layui-badge layui-bg-blue">综合资料</span>
+    {{# } else { }}
+    <span class="layui-badge layui-bg-gray">未知</span>
+    {{# } }}
+</script>
+
+<script type="text/html" id="action">
+    <div class="teaching-plan-action-group">
+        <button class="layui-btn layui-btn-xs layui-btn-normal" lay-event="edit">编辑</button>
+        <button class="layui-btn layui-btn-xs layui-btn-warm" lay-event="download">下载</button>
+        <button class="layui-btn layui-btn-xs layui-btn-danger" lay-event="delete">删除</button>
+    </div>
+</script>
+
+<script>
+    layui.use(['table', 'layer', 'form'], function() {
+        var table = layui.table;
+        var layer = layui.layer;
+        var form = layui.form;
+        var $ = layui.$;
+        var tableId = 'TeachingPlanTable';
+
+        function relocateDefaultToolbar() {
+            var $tableView = $('#table').next('.layui-table-view');
+            var $toolbar = $tableView.find('.layui-table-tool-self');
+            var $anchor = $('#teachingPlanBatchDeleteBtn');
+            if (!$tableView.length || !$toolbar.length || !$anchor.length) {
+                return;
+            }
+            $toolbar.insertAfter($anchor);
+        }
+
+        function getSearchData() {
+            return {
+                keyword: $.trim($('input[name="keyword"]').val())
+            };
+        }
+
+        function setSearchData(data) {
+            data = data || {};
+            $('input[name="keyword"]').val(data.keyword || '');
+        }
+
+        function reloadTable(resetPage) {
+            var options = {
+                where: $.extend({}, getSearchData(), {_t: new Date().getTime()})
+            };
+            if (resetPage) {
+                options.page = {curr: 1};
+            }
+            table.reload(tableId, options);
+        }
+
+        function openForm(title, url, area) {
+            layer.open({
+                type: 2,
+                title: title,
+                content: url,
+                area: area || ['900px', '650px'],
+                end: function() {
+                    reloadTable(false);
+                }
+            });
+        }
+
+        function updateBatchDeleteButtonState() {
+            var selected = table.checkStatus(tableId).data || [];
+            $('#teachingPlanBatchDeleteBtn').toggleClass('table-batch-delete-disabled', !selected.length);
+        }
+
+        function deleteItems(ids, done, options) {
+            options = options || {};
+            $.post('/backend/edu/teaching_plan/delete', {ids: ids.join(',')}, function(res) {
+                if (res.code === 1) {
+                    layer.msg(options.successText || res.msg || '删除成功', {icon: 1}, function() {
+                        reloadTable(false);
+                        updateBatchDeleteButtonState();
+                        if (typeof done === 'function') done(true);
+                    });
+                } else {
+                    layer.msg((res && res.msg) || '删除失败', {icon: 2});
+                    if (typeof done === 'function') done(false);
+                }
+            }, 'json').fail(function() {
+                layer.msg('删除失败，请稍后重试', {icon: 2});
+                if (typeof done === 'function') done(false);
+            });
+        }
+
+        table.render({
+            elem: '#table',
+            id: tableId,
+            url: '/backend/edu/teaching_plan/index',
+            where: $.extend({}, getSearchData(), {_t: new Date().getTime()}),
+            defaultToolbar: ['filter', 'exports', 'print'],
+            toolbar: '#toolbar',
+            cols: [[
+                {type: 'checkbox'},
+                {field: 'id', title: 'ID', width: 80},
+                {field: 'title', title: '教案标题', minWidth: 180},
+                {field: 'course_name', title: '课程', minWidth: 160},
+                {field: 'category_text', title: '分类', width: 120, templet: '#category'},
+                {field: 'teacher_name', title: '教师', minWidth: 140},
+                {field: 'file_name', title: '文件名', minWidth: 180},
+                {field: 'file_size_text', title: '文件大小', width: 120},
+                {field: 'file_type', title: '文件类型', width: 100},
+                {field: 'download_count', title: '下载次数', width: 100},
+                {field: 'status', title: '状态', width: 100, templet: '#status'},
+                {field: 'create_time', title: '创建时间', width: 180},
+                {toolbar: '#action', title: '操作', width: 180, fixed: 'right'}
+            ]],
+            page: true,
+            limit: 10,
+            limits: [10, 20, 30, 50],
+            text: {none: '暂无数据'},
+            done: function() {
+                updateBatchDeleteButtonState();
+                relocateDefaultToolbar();
+            }
+        });
+
+        form.on('submit(search)', function(data) {
+            setSearchData(data.field || {});
+            table.reload(tableId, {
+                where: $.extend({}, getSearchData(), {_t: new Date().getTime()}),
+                page: {curr: 1}
+            });
+            return false;
+        });
+
+        form.on('submit(reset)', function() {
+            setSearchData({keyword: ''});
+            reloadTable(true);
+            return false;
+        });
+
+        table.on('toolbar(table)', function(obj) {
+            var event = obj.event;
+            if (event === 'add') {
+                openForm('上传教案', '/backend/edu/teaching_plan/add');
+            } else if (event === 'batchDelete') {
+                var selected = table.checkStatus(tableId).data || [];
+                if (!selected.length) {
+                    updateBatchDeleteButtonState();
+                    return;
+                }
+                var ids = selected.map(function(item) { return item.id; });
+                layer.confirm('确定要批量删除选中的 ' + ids.length + ' 个教案吗？', function(index) {
+                    deleteItems(ids, function() {
+                        layer.close(index);
+                    }, {successText: '已删除 ' + ids.length + ' 条数据'});
+                });
+            }
+        });
+
+        table.on('checkbox(table)', function() {
+            updateBatchDeleteButtonState();
+        });
+
+        table.on('tool(table)', function(obj) {
+            var event = obj.event;
+            var data = obj.data;
+            if (event === 'edit') {
+                openForm('编辑教案', '/backend/edu/teaching_plan/edit?id=' + data.id);
+            } else if (event === 'download') {
+                window.location.href = '/backend/edu/teaching_plan/download?id=' + data.id;
+            } else if (event === 'delete') {
+                layer.confirm('确定要删除该教案吗？', function(index) {
+                    deleteItems([data.id], function() {
+                        layer.close(index);
+                    });
+                });
+            }
+        });
+
+        window.addEventListener('focus', function() {
+            reloadTable(false);
+        });
+
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                reloadTable(false);
+            }
+        });
+
+        window.__refreshTeachingPlanTable = function(resetPage) {
+            reloadTable(!!resetPage);
+        };
+    });
+</script>

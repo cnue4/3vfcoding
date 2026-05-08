@@ -1,0 +1,245 @@
+{layout name="layout/main" /}
+<style>
+    html, body {height:100%;overflow:auto;background:#f5f7fb;}
+    .change-form-card {min-height:100%;}
+    .change-form-card .layui-card-body {max-height:calc(100vh - 90px);overflow-y:auto;box-sizing:border-box;}
+    .change-block {display:none;}
+    @media (max-width:640px) {
+        .change-form-card .layui-form-label {width:auto;float:none;display:block;margin-bottom:8px;}
+        .change-form-card .layui-input-block {margin-left:0;}
+    }
+</style>
+<div class="layui-card change-form-card">
+    <div class="layui-card-header">
+        <h3 class="layui-card-title">{if isset($formData['id'])}编辑学生异动{else}添加学生异动{/if}</h3>
+    </div>
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane" id="form"
+              action="{if isset($formData['id']) && $formData['id']}/backend/edu/student_change/edit?id={$formData['id']|default=''}{else}/backend/edu/student_change/add{/if}"
+              method="post">
+            {:token_field()}
+            <input type="hidden" name="id" value="{$formData['id']|default=''}">
+            <input type="hidden" name="student_id" id="student_id" value="{$formData['student_id']|default=''}">
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">搜索学生 <span class="layui-form-must">*</span></label>
+                <div class="layui-input-block">
+                    <input type="text" name="student_keyword" id="student_keyword" value="{$formData['student_name']|default=''}" class="layui-input" placeholder="请输入学生姓名或学号后点击搜索" autocomplete="off">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button type="button" class="layui-btn layui-btn-primary" id="searchStudentBtn"><i class="layui-icon layui-icon-search"></i> 搜索学生</button>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">学生姓名</label>
+                <div class="layui-input-block">
+                    <input type="text" id="student_name_display" value="{$formData['student_name']|default=''}" class="layui-input" readonly>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">班级</label>
+                <div class="layui-input-block">
+                    <input type="text" id="class_name_display" value="{$formData['class_name']|default=''}" class="layui-input" readonly>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">学员状态 <span class="layui-form-must">*</span></label>
+                <div class="layui-input-block">
+                    <select name="change_type" id="change_type" lay-filter="changeType" lay-verify="required">
+                        {volist name="changeTypeList" id="typeName" key="typeValue"}
+                        <option value="{$typeValue}" {if isset($formData['change_type']) && (int)$formData['change_type']==(int)$typeValue}selected{elseif !isset($formData['change_type']) && (int)$typeValue===1}selected{/if}>{$typeName}</option>
+                        {/volist}
+                    </select>
+                </div>
+            </div>
+
+            <div class="change-block" data-type="1">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">请假开始时间 <span class="layui-form-must">*</span></label>
+                    <div class="layui-input-block">
+                        <input type="date" name="leave_start_time" value="{$formData['leave_start_time']|default=''}" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">请假结束时间 <span class="layui-form-must">*</span></label>
+                    <div class="layui-input-block">
+                        <input type="date" name="leave_end_time" value="{$formData['leave_end_time']|default=''}" class="layui-input">
+                    </div>
+                </div>
+            </div>
+
+            <div class="change-block" data-type="2">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">旧课程 <span class="layui-form-must">*</span></label>
+                    <div class="layui-input-block">
+                        <select name="old_course_id">
+                            <option value="">请选择旧课程</option>
+                            {volist name="courseList" id="courseName" key="courseId"}
+                            <option value="{$courseId}" {if isset($formData['old_course_id']) && (int)$formData['old_course_id']==(int)$courseId}selected{/if}>{$courseName}</option>
+                            {/volist}
+                        </select>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">新课程 <span class="layui-form-must">*</span></label>
+                    <div class="layui-input-block">
+                        <select name="new_course_id">
+                            <option value="">请选择新课程</option>
+                            {volist name="courseList" id="courseName" key="courseId"}
+                            <option value="{$courseId}" {if isset($formData['new_course_id']) && (int)$formData['new_course_id']==(int)$courseId}selected{/if}>{$courseName}</option>
+                            {/volist}
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="change-block" data-type="3">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">退费金额 <span class="layui-form-must">*</span></label>
+                    <div class="layui-input-block">
+                        <input type="number" name="refund_amount" value="{$formData['refund_amount']|default=''}" class="layui-input" placeholder="请输入退费金额（单位：元）" min="0.01" step="0.01">
+                    </div>
+                </div>
+                <div class="layui-form-item layui-form-text">
+                    <label class="layui-form-label">退费明细 <span class="layui-form-must">*</span></label>
+                    <div class="layui-input-block">
+                        <textarea name="refund_detail" class="layui-textarea" placeholder="请输入退费明细">{$formData['refund_detail']|default=''}</textarea>
+                    </div>
+                </div>
+                <div class="layui-form-item layui-form-text">
+                    <label class="layui-form-label">退费原因 <span class="layui-form-must">*</span></label>
+                    <div class="layui-input-block">
+                        <textarea name="refund_reason" class="layui-textarea" placeholder="请输入退费原因">{$formData['refund_reason']|default=''}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="change-block" data-type="4">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">赠送课时数量 <span class="layui-form-must">*</span></label>
+                    <div class="layui-input-block">
+                        <input type="number" name="gift_hours" value="{$formData['gift_hours']|default=''}" class="layui-input" placeholder="请输入赠送课时数量" min="0.01" step="0.01">
+                    </div>
+                </div>
+                <div class="layui-form-item layui-form-text">
+                    <label class="layui-form-label">赠课原因 <span class="layui-form-must">*</span></label>
+                    <div class="layui-input-block">
+                        <textarea name="gift_reason" class="layui-textarea" placeholder="请输入赠课原因">{$formData['gift_reason']|default=''}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="change-block" data-type="5">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">删除课时 <span class="layui-form-must">*</span></label>
+                    <div class="layui-input-block">
+                        <input type="number" name="delete_gift_hours" value="{$formData['delete_gift_hours']|default=''}" class="layui-input" placeholder="请输入删除课时" min="0.01" step="0.01">
+                    </div>
+                </div>
+                <div class="layui-form-item layui-form-text">
+                    <label class="layui-form-label">删除原因 <span class="layui-form-must">*</span></label>
+                    <div class="layui-input-block">
+                        <textarea name="delete_gift_reason" class="layui-textarea" placeholder="请输入删除原因">{$formData['delete_gift_reason']|default=''}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="layui-form-item layui-form-text">
+                <label class="layui-form-label">备注</label>
+                <div class="layui-input-block">
+                    <textarea name="remark" class="layui-textarea" placeholder="请输入备注">{$formData['remark']|default=''}</textarea>
+                </div>
+            </div>
+
+            <div class="layui-form-item" style="display:none;">
+                <label class="layui-form-label">状态</label>
+                <div class="layui-input-block">
+                    <input type="radio" name="status" value="1" title="正常" {if !isset($formData['status']) || (int)$formData['status']==1}checked{/if}>
+                    <input type="radio" name="status" value="2" title="禁用" {if isset($formData['status']) && (int)$formData['status']==2}checked{/if}>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button type="submit" class="layui-btn layui-btn-normal" lay-submit lay-filter="submit"><i class="layui-icon layui-icon-save"></i> 保存</button>
+                    <button type="button" class="layui-btn layui-btn-primary" onclick="parent.layer.closeAll()"><i class="layui-icon layui-icon-close"></i> 取消</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+layui.use(['form','layer'], function(){
+    var form = layui.form, layer = layui.layer, $ = layui.$;
+    form.render();
+
+    function setStudent(student){
+        $('#student_id').val(student.id || '');
+        $('#student_name_display').val(student.name || '');
+        $('#class_name_display').val(student.class_name || '');
+        $('#student_keyword').val(student.name || '');
+    }
+
+    function refreshParentAndClose(resetPage){
+        if(parent && typeof parent.__refreshStudentChangeTable === 'function'){ parent.__refreshStudentChangeTable(!!resetPage); }
+        if(parent && parent.layer){
+            var frameIndex = parent.layer.getFrameIndex(window.name);
+            parent.layer.close(frameIndex);
+        }
+    }
+
+    function toggleBlocks(type){
+        $('.change-block').hide();
+        $('.change-block[data-type="' + type + '"]').show();
+    }
+
+    form.on('select(changeType)', function(data){
+        toggleBlocks(data.value);
+    });
+
+    $('#searchStudentBtn').on('click', function(){
+        var keyword = $.trim($('#student_keyword').val());
+        if(!keyword){ layer.msg('请输入学生姓名或学号', {icon:2}); return; }
+        $.get('/backend/edu/student/index', {keyword:keyword, page:1, limit:20}, function(res){
+            if(!res || !res.data || !res.data.length){ layer.msg('没有找到该学生', {icon:2}); return; }
+            if(res.data.length === 1){ setStudent(res.data[0]); layer.msg('已自动选中学生', {icon:1}); return; }
+            var html = '<div style="padding:12px;">';
+            $.each(res.data, function(_, item){
+                html += '<div class="choose-student-item" data-id="' + item.id + '" data-name="' + (item.name || '') + '" data-class="' + (item.class_name || '') + '" data-contact="' + (item.contact_name || '') + '" data-phone="' + (item.phone || '') + '" data-class-id="' + (item.class_id || '') + '" style="padding:10px 12px;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:8px;cursor:pointer;">'
+                    + '<div style="font-weight:700;color:#111827;">' + (item.name || '') + '</div>'
+                    + '<div style="font-size:12px;color:#6b7280;margin-top:4px;">学号：' + (item.student_no || '') + '　班级：' + (item.class_name || '') + '</div>'
+                    + '</div>';
+            });
+            html += '</div>';
+            layer.open({
+                type:1,
+                title:'请选择学生',
+                area:['520px','420px'],
+                content:html,
+                success:function(layero, index){
+                    $(layero).find('.choose-student-item').on('click', function(){
+                        setStudent({id:$(this).data('id'), name:$(this).data('name'), class_name:$(this).data('class'), contact_name:$(this).data('contact'), phone:$(this).data('phone'), class_id:$(this).data('class-id')});
+                        layer.close(index);
+                    });
+                }
+            });
+        }, 'json');
+    });
+
+    form.on('submit(submit)', function(data){
+        if(!$.trim(data.field.student_id || '')){ layer.msg('请先搜索并选择学生', {icon:2}); return false; }
+        $.post($('#form').attr('action'), data.field, function(res){
+            if(res.code === 1){
+                layer.msg(res.msg, {icon:1}, function(){ refreshParentAndClose(false); });
+            } else {
+                layer.msg(res.msg, {icon:2});
+            }
+        }, 'json');
+        return false;
+    });
+
+    toggleBlocks($('#change_type').val() || '1');
+});
+</script>

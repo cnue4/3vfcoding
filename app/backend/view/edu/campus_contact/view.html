@@ -1,0 +1,97 @@
+{layout name="layout/main" /}
+<style>
+    html, body {
+        height: 100%;
+        overflow: auto;
+        background: #f5f7fb;
+    }
+    .contact-view-card {
+        min-height: 100%;
+    }
+    .contact-view-card .layui-card-body {
+        max-height: calc(100vh - 90px);
+        overflow-y: auto;
+        box-sizing: border-box;
+    }
+    @media (max-width: 640px) {
+        .contact-view-card .layui-form-label {
+            width: auto;
+            float: none;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .contact-view-card .layui-input-block {
+            margin-left: 0;
+        }
+    }
+</style>
+<div class="layui-card contact-view-card">
+    <div class="layui-card-header">
+        <h3 class="layui-card-title">查看联系人</h3>
+    </div>
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane">
+            <div class="layui-form-item">
+                <label class="layui-form-label">ID</label>
+                <div class="layui-input-block">
+                    <input type="text" value="{$formData.id|default=''}" class="layui-input" readonly>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">姓名</label>
+                <div class="layui-input-block">
+                    <input type="text" value="{$formData.name|default=''}" class="layui-input" readonly>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">性别</label>
+                <div class="layui-input-block">
+                    <input type="text" value="{$formData.gender_text|default=''}" class="layui-input" readonly>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">职务</label>
+                <div class="layui-input-block">
+                    <input type="text" value="{$formData.position_text|default=''}" class="layui-input" readonly>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">电话</label>
+                <div class="layui-input-block">
+                    <input type="text" value="{$formData.phone|default=''}" class="layui-input" readonly>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">邮箱</label>
+                <div class="layui-input-block">
+                    <input type="text" value="{$formData.email|default=''}" class="layui-input" readonly>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">备注</label>
+                <div class="layui-input-block">
+                    <textarea class="layui-textarea" readonly>{$formData.remark|default=''}</textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">添加时间</label>
+                <div class="layui-input-block">
+                    <input type="text" value="{$formData.create_time|default=''}" class="layui-input" readonly>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">更新时间</label>
+                <div class="layui-input-block">
+                    <input type="text" value="{$formData.update_time|default=''}" class="layui-input" readonly>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button type="button" class="layui-btn layui-btn-primary" onclick="parent.layer.closeAll()">
+                        <i class="layui-icon layui-icon-close"></i> 关闭
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

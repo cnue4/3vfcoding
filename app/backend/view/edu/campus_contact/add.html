@@ -1,0 +1,129 @@
+{layout name="layout/main" /}
+<style>
+    html, body {
+        height: 100%;
+        overflow: auto;
+        background: #f5f7fb;
+    }
+    .contact-form-card {
+        min-height: 100%;
+    }
+    .contact-form-card .layui-card-body {
+        max-height: calc(100vh - 90px);
+        overflow-y: auto;
+        box-sizing: border-box;
+    }
+    @media (max-width: 640px) {
+        .contact-form-card .layui-form-label {
+            width: auto;
+            float: none;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .contact-form-card .layui-input-block {
+            margin-left: 0;
+        }
+    }
+</style>
+<div class="layui-card contact-form-card">
+    <div class="layui-card-header">
+        <h3 class="layui-card-title">{if isset($formData['id'])}编辑联系人{else}添加联系人{/if}</h3>
+    </div>
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane" id="form"
+              action="{if isset($formData['id']) && $formData['id']}/backend/edu/campus_contact/edit?id={$formData['id']|default=''}{else}/backend/edu/campus_contact/add{/if}"
+              method="post">
+            {:token_field()}
+            <input type="hidden" name="id" value="{$formData['id']|default=''}">
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">姓名 <span class="layui-form-must">*</span></label>
+                <div class="layui-input-block">
+                    <input type="text" name="name" value="{$formData['name']|default=''}" class="layui-input" placeholder="请输入姓名" required lay-verify="required">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">性别 <span class="layui-form-must">*</span></label>
+                <div class="layui-input-block">
+                    <input type="radio" name="gender" value="1" title="男" {if !isset($formData['gender']) || (int)$formData['gender']==1}checked{/if}>
+                    <input type="radio" name="gender" value="0" title="女" {if isset($formData['gender']) && (int)$formData['gender']==0}checked{/if}>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">职务 <span class="layui-form-must">*</span></label>
+                <div class="layui-input-block">
+                    <select name="position" lay-verify="required">
+                        <option value="">请选择职务</option>
+                        {volist name="positionList" id="positionName" key="positionValue"}
+                        <option value="{$positionValue}" {if isset($formData['position']) && (int)$formData['position']==(int)$positionValue}selected{elseif !isset($formData['position']) && (int)$positionValue===1}selected{/if}>{$positionName}</option>
+                        {/volist}
+                    </select>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">电话 <span class="layui-form-must">*</span></label>
+                <div class="layui-input-block">
+                    <input type="text" name="phone" value="{$formData['phone']|default=''}" class="layui-input" placeholder="请输入11位手机号" required lay-verify="required">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">邮箱</label>
+                <div class="layui-input-block">
+                    <input type="text" name="email" value="{$formData['email']|default=''}" class="layui-input" placeholder="请输入邮箱">
+                </div>
+            </div>
+
+            <div class="layui-form-item layui-form-text">
+                <label class="layui-form-label">备注</label>
+                <div class="layui-input-block">
+                    <textarea name="remark" class="layui-textarea" placeholder="请输入备注">{$formData['remark']|default=''}</textarea>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button type="submit" class="layui-btn layui-btn-normal" lay-submit lay-filter="submit">
+                        <i class="layui-icon layui-icon-save"></i> 保存
+                    </button>
+                    <button type="button" class="layui-btn layui-btn-primary" onclick="parent.layer.closeAll()">
+                        <i class="layui-icon layui-icon-close"></i> 取消
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    layui.use(['form', 'layer'], function() {
+        var form = layui.form;
+        var layer = layui.layer;
+        form.render();
+
+        function refreshParentAndClose(resetPage) {
+            if (parent && typeof parent.__refreshCampusContactTable === 'function') {
+                parent.__refreshCampusContactTable(!!resetPage);
+            }
+            if (parent && parent.layer) {
+                var frameIndex = parent.layer.getFrameIndex(window.name);
+                parent.layer.close(frameIndex);
+            }
+        }
+
+        form.on('submit(submit)', function(data) {
+            $.post($('#form').attr('action'), data.field, function(res) {
+                if (res.code === 1) {
+                    layer.msg(res.msg, {icon: 1}, function() {
+                        refreshParentAndClose(false);
+                    });
+                } else {
+                    layer.msg(res.msg, {icon: 2});
+                }
+            }, 'json');
+            return false;
+        });
+    });
+</script>

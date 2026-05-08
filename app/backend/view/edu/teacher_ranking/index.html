@@ -1,0 +1,123 @@
+{layout name="layout/main" /}
+<style>
+    :root {
+        --rank-bg:#0b1020;
+        --rank-card:#121a31;
+        --rank-card-soft:#17213e;
+        --rank-line:rgba(148,163,184,.16);
+        --rank-text:#e5eefc;
+        --rank-muted:#8ea3c7;
+        --rank-gold:#f6c453;
+        --rank-silver:#b6c2da;
+        --rank-bronze:#d79567;
+        --rank-green:#37d39a;
+        --rank-red:#ff6b7a;
+    }
+    html,body{background:radial-gradient(circle at top,#1a2550 0,#0b1020 45%,#070b15 100%);min-height:100%;}
+    .ranking-page{padding:18px;}
+    .ranking-hero{position:relative;overflow:hidden;border-radius:24px;padding:22px 24px;background:linear-gradient(135deg,#dff1ff 0%,#cfe7ff 52%,#eaf4ff 100%);border:1px solid rgba(116,164,255,.28);box-shadow:0 18px 60px rgba(76,120,196,.18);}
+    .ranking-hero:before{content:'';position:absolute;right:-80px;top:-80px;width:240px;height:240px;background:radial-gradient(circle,rgba(124,174,255,.26),rgba(124,174,255,0));}
+    .ranking-title{color:#17325f;font-size:28px;font-weight:800;letter-spacing:.5px;font-family:"Microsoft YaHei UI";}
+    .ranking-subtitle{margin-top:8px;color:#58739e;font-size:14px;max-width:820px;line-height:1.8;}
+    .summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:18px;}
+    .summary-card{background:linear-gradient(180deg,rgba(11,18,38,.96),rgba(20,30,58,.94));border:1px solid rgba(115,181,255,.18);border-radius:18px;padding:16px 18px;box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 10px 24px rgba(0,0,0,.22);}
+    .summary-label{font-size:12px;color:#9fb5dc;letter-spacing:.5px;}
+    .summary-value{margin-top:8px;font-size:28px;font-weight:800;color:#fff;}
+    .ranking-layout{display:grid;grid-template-columns:340px minmax(0,1fr);gap:18px;margin-top:18px;}
+    .ranking-panel,.ranking-table-card{background:rgba(18,26,49,.92);border:1px solid var(--rank-line);border-radius:24px;box-shadow:0 18px 50px rgba(0,0,0,.22);}
+    .ranking-panel{padding:18px;}
+    .panel-title{font-size:18px;font-weight:800;color:var(--rank-text);margin-bottom:14px;}
+    .top-list{display:flex;flex-direction:column;gap:14px;}
+    .top-item{border-radius:18px;padding:16px;background:linear-gradient(135deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.05);}
+    .top-item.rank-1{box-shadow:inset 0 0 0 1px rgba(246,196,83,.35);}
+    .top-item.rank-2{box-shadow:inset 0 0 0 1px rgba(182,194,218,.28);}
+    .top-item.rank-3{box-shadow:inset 0 0 0 1px rgba(215,149,103,.3);}
+    .medal{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;font-size:18px;font-weight:900;color:#111827;}
+    .rank-1 .medal{background:linear-gradient(135deg,var(--rank-gold),#ffe7a6);}
+    .rank-2 .medal{background:linear-gradient(135deg,var(--rank-silver),#eef2fb);}
+    .rank-3 .medal{background:linear-gradient(135deg,var(--rank-bronze),#ffd7b8);}
+    .top-head{display:flex;align-items:center;gap:12px;}
+    .top-name{font-size:18px;font-weight:800;color:#fff;}
+    .top-meta{font-size:12px;color:var(--rank-muted);margin-top:4px;}
+    .top-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px;}
+    .mini-stat{padding:10px 12px;border-radius:14px;background:rgba(255,255,255,.04);}
+    .mini-label{font-size:12px;color:#8ea3c7;}
+    .mini-value{margin-top:4px;font-size:18px;font-weight:800;color:#fff;}
+    .ranking-table-card{padding:16px;}
+    .ranking-toolbar{display:flex;justify-content:space-between;align-items:stretch;gap:12px;flex-wrap:wrap;margin-bottom:12px;}
+    .daily-quote-card{flex:1 1 520px;display:flex;gap:14px;align-items:flex-start;padding:16px 18px;border-radius:18px;background:linear-gradient(135deg,rgba(115,181,255,.12),rgba(87,211,160,.10));border:1px solid rgba(115,181,255,.18);}
+    .daily-quote-icon{display:flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:14px;background:rgba(255,255,255,.10);font-size:22px;flex:none;}
+    .daily-quote-label{font-size:12px;color:#9fb5dc;letter-spacing:.5px;}
+    .daily-quote-text{margin-top:6px;color:#f8fbff;font-size:16px;line-height:1.9;font-weight:700;}
+    .daily-quote-author{margin-top:6px;color:#8ea3c7;font-size:13px;}
+    .ranking-note{display:flex;align-items:center;justify-content:flex-end;flex:1 1 100%;font-size:12px;color:#8ea3c7;white-space:nowrap;overflow-x:auto;overflow-y:hidden;}
+    .layui-table-view,.layui-table-header,.layui-table-tool,.layui-table-page,.layui-table-box,.layui-table,.layui-table-body,.layui-table-main{border:none!important;background:transparent!important;}
+    .layui-table tbody tr,.layui-table-click,.layui-table[lay-even] tbody tr:nth-child(even),.layui-table-even,.layui-table tbody td{background:transparent!important;color:#e5eefc!important;}
+    .layui-table th,.layui-table td{border-color:rgba(148,163,184,.12)!important;}
+    .layui-table thead tr,.layui-table-header{background:#121b34!important;}
+    .layui-table thead th{color:#cfe0ff!important;font-weight:700;}
+    .rank-pill{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:34px;padding:0 10px;border-radius:999px;font-weight:800;color:#0f172a;}
+    .rank-pill.rank-1{background:var(--rank-gold);} .rank-pill.rank-2{background:var(--rank-silver);} .rank-pill.rank-3{background:var(--rank-bronze);} .rank-pill.rank-other{background:#dbeafe;}
+    .rate-good{color:var(--rank-green);font-weight:800;} .rate-bad{color:var(--rank-red);font-weight:800;}
+    .course-week{display:grid;grid-template-columns:repeat(7,minmax(54px,1fr));gap:6px;min-width:520px;}
+    .course-week span{display:flex;align-items:center;justify-content:center;padding:6px 8px;border-radius:12px;background:rgba(115,181,255,.12);color:#b7d6ff;font-size:12px;white-space:nowrap;}
+    @media (max-width:1200px){.ranking-layout{grid-template-columns:1fr;}.summary-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+    @media (max-width:768px){.summary-grid{grid-template-columns:1fr;}.ranking-page{padding:12px;}.ranking-note{justify-content:flex-start;}}
+</style>
+<div class="ranking-page">
+    <div class="ranking-hero">
+        <div class="ranking-title">教师数据排行</div>
+        <div class="ranking-subtitle">综合统计所有教师当前带班数量、学生人数、每周课程分布、退费率与请假率，形成实时教学战力榜。默认按综合得分排序，得分越高排名越靠前。</div>
+        <div class="summary-grid">
+            <div class="summary-card"><div class="summary-label">教师总数</div><div class="summary-value" id="summaryTeachers">0</div></div>
+            <div class="summary-card"><div class="summary-label">总带班数</div><div class="summary-value" id="summaryClasses">0</div></div>
+            <div class="summary-card"><div class="summary-label">总学生数</div><div class="summary-value" id="summaryStudents">0</div></div>
+            <div class="summary-card"><div class="summary-label">每周总课程数</div><div class="summary-value" id="summaryCourses">0</div></div>
+        </div>
+    </div>
+    <div class="ranking-layout">
+        <div class="ranking-panel">
+            <div class="panel-title">TOP 3 榜单</div>
+            <div class="top-list" id="topList"><div class="top-item"><div class="top-name">暂无数据</div></div></div>
+        </div>
+        <div class="ranking-table-card">
+            <div class="ranking-toolbar">
+                <div class="daily-quote-card">
+                    <div class="daily-quote-icon">☀</div>
+                    <div>
+                        <div class="daily-quote-label">今日励志语</div>
+                        <div class="daily-quote-text" id="dailyQuoteText">教育的本质，不是灌输，而是点燃火焰。</div>
+                        <div class="daily-quote-author" id="dailyQuoteAuthor">—— 苏格拉底</div>
+                    </div>
+                </div>
+                <div class="ranking-note">教师排行公式 = 带班数量 × 20 + 学生人数 × 3 + 每周课程数 × 8 - 退费率 × 1.5 - 请假率 × 0.8</div>
+            </div>
+            <table class="layui-hide" id="rankingTable" lay-filter="rankingTable"></table>
+        </div>
+    </div>
+</div>
+<script>
+layui.use(['table'], function(){
+    var table = layui.table;
+    var tableId = 'TeacherRankingTable';
+    var dailyQuotes = [
+        ['教育的本质，不是灌输，而是点燃火焰。','—— 苏格拉底'],['教师最大的幸福，就是把一群群孩子送往理想的彼岸。','—— 叶圣陶'],['只有受过一种合适的教育之后，人才能成为一个人。','—— 夸美纽斯'],['教育是农业，不是工业。','—— 叶圣陶'],['教育不是注满一桶水，而是点燃一把火。','—— 叶芝'],['教学的艺术不在于传授本领，而在于激励、唤醒和鼓舞。','—— 第斯多惠'],['使学生对教师尊敬的唯一源泉，在于教师的德和才。','—— 爱因斯坦'],['一个好教师，是一个懂得心理学和教育学的人。','—— 苏霍姆林斯基'],['没有爱，就没有教育。','—— 苏霍姆林斯基'],['教育者的关注和爱护在学生的心灵上会留下不可磨灭的印象。','—— 苏霍姆林斯基'],['教师的人格，就是教育工作中的一切。','—— 乌申斯基'],['凡是别人能做到的事，只要自己有恒心、有毅力地努力，是没有什么事做不到的。','—— 牛顿'],['天才不过是不断思索，凡有头脑的人，都有天才。','—— 莫泊桑'],['一个人即使已登上顶峰，也仍要自强不息。','—— 罗素·贝克'],['把简单的事做好，就是不简单；把平凡的事做好，就是不平凡。','—— 张瑞敏'],['真正的教育与其说是言辞，无宁说是在实践。','—— 卢梭'],['教育的艺术是使学生喜欢你所教的东西。','—— 卢梭'],['如果学习只在模仿，那么我们就不会有科学，也不会有技术。','—— 高尔基'],['要散布阳光到别人心里，先得自己心里有阳光。','—— 罗曼·罗兰'],['生活即教育，社会即学校，教学做合一。','—— 陶行知'],['捧着一颗心来，不带半根草去。','—— 陶行知'],['千教万教，教人求真；千学万学，学做真人。','—— 陶行知'],['教育贵于薰习，风气赖于浸染。','—— 郭秉文'],['每一个不曾起舞的日子，都是对生命的辜负。','—— 尼采'],['路虽远，行则将至；事虽难，做则必成。','—— 荀子'],['志不求易者成，事不避难者进。','—— 《后汉书》'],['业精于勤，荒于嬉；行成于思，毁于随。','—— 韩愈'],['纸上得来终觉浅，绝知此事要躬行。','—— 陆游'],['教育是国之大计、党之大计。','—— 习近平'],['教师不仅是知识的传播者，而且是模范。','—— 布鲁纳'],['最有价值的知识，是关于方法的知识。','—— 笛卡尔']
+    ];
+    function seededRandom(seed){ var x = Math.sin(seed) * 10000; return x - Math.floor(x); }
+    function renderDailyQuote(){
+        var now = new Date(), seedBase = now.getFullYear() * 100 + (now.getMonth() + 1), items = dailyQuotes.slice();
+        for (var i = items.length - 1; i > 0; i--) { var j = Math.floor(seededRandom(seedBase + i) * (i + 1)), t = items[i]; items[i] = items[j]; items[j] = t; }
+        var quote = items[Math.min(now.getDate(), 31) - 1] || dailyQuotes[0];
+        $('#dailyQuoteText').text(quote[0]); $('#dailyQuoteAuthor').text(quote[1]);
+    }
+    function renderTopList(rows){
+        var topRows = (rows || []).slice(0, 3); if(!topRows.length){ $('#topList').html('<div class="top-item"><div class="top-name">暂无排行数据</div></div>'); return; }
+        var medals = ['🥇','🥈','🥉'], html = '';
+        $.each(topRows, function(index, item){ html += '<div class="top-item rank-' + (index + 1) + '"><div class="top-head"><div class="medal">' + medals[index] + '</div><div><div class="top-name">第' + item.rank_no + '名 · ' + (item.teacher_name || '') + '</div><div class="top-meta">账号：' + (item.teacher_username || '') + ' ｜ <span style="color:#ffffff;">综合得分：' + item.score + '</span></div></div></div><div class="top-stats"><div class="mini-stat"><div class="mini-label">带班数量</div><div class="mini-value">' + item.class_count + '</div></div><div class="mini-stat"><div class="mini-label">学生人数</div><div class="mini-value">' + item.student_count + '</div></div><div class="mini-stat"><div class="mini-label">课程数</div><div class="mini-value">' + item.weekly_course_count + '</div></div><div class="mini-stat"><div class="mini-label">退费率 / 请假率</div><div class="mini-value">' + item.refund_rate + '% / ' + item.leave_rate + '%</div></div></div></div>'; });
+        $('#topList').html(html);
+    }
+    function renderSummary(summary){ summary = summary || {}; $('#summaryTeachers').text(summary.teacher_count || 0); $('#summaryClasses').text(summary.class_count || 0); $('#summaryStudents').text(summary.student_count || 0); $('#summaryCourses').text(summary.weekly_course_count || 0); }
+    table.render({elem:'#rankingTable',id:tableId,url:'/backend/edu/teacher_ranking/index',defaultToolbar:['filter','exports','print'],response:{statusCode:0},parseData:function(res){ renderTopList((res.extra && res.extra.top3) || res.data || []); renderSummary((res.extra && res.extra.summary) || {}); return res; },cols:[[{field:'rank_no',title:'排名',width:90,templet:function(d){ var cls = d.rank_no <= 3 ? ('rank-' + d.rank_no) : 'rank-other'; return '<span class="rank-pill ' + cls + '">' + d.rank_no + '</span>'; }},{field:'teacher_name',title:'老师',width:150,templet:function(d){ return '<div style="font-weight:800;color:#fff;">' + (d.teacher_name || '') + '</div><div style="font-size:12px;color:#8ea3c7;">' + (d.teacher_username || '') + '</div>'; }},{field:'class_count',title:'带班数量',width:110,sort:true},{field:'student_count',title:'学生人数',width:110,sort:true},{field:'weekly_course_count',title:'课程数',width:100,sort:true},{field:'weekday_stats',title:'周课分布',minWidth:560,templet:function(d){ return '<div class="course-week"><span>周一 ' + d.monday_count + '</span><span>周二 ' + d.tuesday_count + '</span><span>周三 ' + d.wednesday_count + '</span><span>周四 ' + d.thursday_count + '</span><span>周五 ' + d.friday_count + '</span><span>周六 ' + d.saturday_count + '</span><span>周日 ' + d.sunday_count + '</span></div>'; }},{field:'refund_rate',title:'退费率',width:100,templet:function(d){ return '<span class="rate-bad">' + d.refund_rate + '%</span>'; }},{field:'leave_rate',title:'请假率',width:100,templet:function(d){ return '<span class="rate-good">' + d.leave_rate + '%</span>'; }},{field:'score',title:'综合得分',width:110,sort:true,templet:function(d){ return '<span style="color:#ffffff;font-weight:800;">' + d.score + '</span>'; }}]],page:false,text:{none:'暂无排行数据'}});
+    renderDailyQuote();
+});
+</script>

@@ -1,0 +1,99 @@
+<table class="layui-table" id="list" lay-filter="list"
+       data-node-add="{:auth(addons_url('add'))}"
+       data-node-edit="{:auth(addons_url('edit'))}"
+       data-node-delete="{:auth(addons_url('delete'))}"
+       data-node-destroy="{:auth(addons_url('destroy'))}"
+       data-node-modify="{:auth(addons_url('modify'))}"
+       data-node-recyle="{:auth(addons_url('recyle'))}"
+       data-node-restore="{:auth(addons_url('index'))}"
+       data-node-import="{:auth(addons_url('import'))}"
+       data-node-export="{:auth(addons_url('export'))}"
+></table>
+<script>var typeList = {:json_encode($engineList)};
+var datatypeList = [{'val':'TINYINT','text':'小整数'},
+    {'val':'int','text':'整数'},
+    {'val':'bigint','text':'极大整数gigint'},
+    {'val':'float','text':'单精度浮点数'},
+    {'val':'double','text':'双精度浮点数'},
+    {'val':'date','text':'日期date'},
+    {'val':'time','text':'时间time'},
+    {'val':'datetime','text':'日期时间'},
+    {'val':'char','text':'字符串char'},
+    {'val':'varchar','text':'变长字符串varchar'},
+    {'val':'text','text':'文本text'},
+    {'val':'longtext','text':'大文本longtext'},];
+var selectList = [['tinyint','小整数'],
+    ['int','整数'],
+    ['bigint','极大整数gigint'],
+    ['float','单精度浮点数'],
+    ['double','双精度浮点数'],
+    ['date','日期date'],
+    ['time','时间time'],
+    ['datetime','日期时间'],
+    ['char','字符串char'],
+    ['varchar','变长字符串varchar'],
+    ['text','文本text'],
+    ['longtext','大文本longtext']];
+</script>
+
+
+
+<script type="text/html" id="type">
+    <div class="layui-input-inline">
+        <select name="datatype">
+            <option value="">请选择</option>
+            {{# datatypeList.forEach(function(value,index){   }}
+            <option value="{{ value.val }}"
+                {{# if(value.val =='varchar'){ }} selected {{# } }}
+            > {{ value.text }} </option>
+            {{# }); }}
+
+        </select>
+    </div>
+</script>
+
+<script>
+    layui.use('form', function () {
+        var form = layui.form;//监听下拉框编辑
+        form.on('select(datatype)', function (data) {//获取当前行tr对象
+            console.log('data',data)
+            var elem = data.othis.parents('tr');//第一列的值是Guid，取guid来判断
+            var Guid = elem.first().find('td').eq(1).text();//选择的select对象值；
+            var selectValue = data.value;//这里的JsonDataInti是我自定义的table中数据的缓存数据，下拉数据修改时赋值到这一行缓存数据
+            for (i = 0; i < jsonDataInit.length; i++) {
+                if (jsonDataInit[i].Guid == Guid) {
+                    jsonDataInit[i].NewReformStatus = selectValue; //更新被修改的行数据
+                }
+            }
+        })
+
+    });
+</script>
+
+
+<style>
+    /* 防止下拉框的下拉列表被隐藏---必须设置--- 此样式和表格的样式有冲突 如果表格列数太多 会出现错乱的情况 目前我的解决方法是忽略下拉框的美化渲染 <select lay-ignore> */
+    .layui-table-cell {
+        overflow: visible !important;
+    }
+
+    .layui-table-box {
+        overflow: visible;
+    }
+
+    .layui-table-body {
+        overflow: visible;
+    }
+
+    /* 设置下拉框的高度与表格单元相同 */
+    td .layui-form-select{
+        margin-top: -10px;
+        margin-left: -15px;
+        margin-right: -15px;
+    }
+
+    .layui-table-view .layui-table th{
+        overflow:hidden;
+    }
+
+</style>

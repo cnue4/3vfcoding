@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>三维狐少儿编程 - 激发创造力，编程向未来</title>
+    <!-- Google Fonts & Font Awesome 6 (免费CDN) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fefcf8;
+            color: #1e2a3e;
+            line-height: 1.5;
+            scroll-behavior: smooth;
+        }
+
+        /* 容器约束 */
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* 导航栏 */
+        .navbar {
+            background-color: #ffffff;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.03);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(2px);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            padding: 16px 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.75rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, #F97316, #F59E0B);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            transition: transform 0.2s ease;
+        }
+        .logo i {
+            background: none;
+            color: #F97316;
+            font-size: 2rem;
+            background-clip: unset;
+            -webkit-background-clip: unset;
+        }
+        .logo span {
+            background: linear-gradient(135deg, #F97316, #F59E0B);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+        }
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .nav-links a {
+            text-decoration: none;
+            font-weight: 500;
+            color: #334155;
+            transition: color 0.2s;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        .nav-links a:hover {
+            color: #F97316;
+        }
+        .btn-outline-light {
+            background: transparent;
+            border: 1.5px solid #F97316;
+            padding: 6px 18px;
+            border-radius: 40px;
+            color: #F97316;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .btn-outline-light:hover {
+            background: #F97316;
+            color: white;
+        }
+
+        /* Hero 区域 */
+        .hero {
+            padding: 60px 0 40px 0;
+            background: linear-gradient(145deg, #fff8f0 0%, #fff4e6 100%);
+            border-radius: 0 0 48px 48px;
+            margin-bottom: 20px;
+        }
+        .hero-content {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .hero-badge {
+            background: #fff0e0;
+            color: #F97316;
+            display: inline-block;
+            padding: 6px 18px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+        .hero h1 {
+            font-size: 3.2rem;
+            font-weight: 800;
+            line-height: 1.2;
+            background: linear-gradient(135deg, #F97316, #F59E0B, #EA580C);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 20px;
+            letter-spacing: -0.02em;
+        }
+        .hero p {
+            font-size: 1.2rem;
+            color: #475569;
+            max-width: 620px;
+            margin: 0 auto 32px;
+        }
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn-primary {
+            background: #F97316;
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 8px 16px -8px rgba(249,115,22,0.3);
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-primary:hover {
+            background: #EA580C;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 20px -8px rgba(249,115,22,0.4);
+        }
+        .btn-secondary {
+            background: white;
+            color: #F97316;
+            border: 1.5px solid #F97316;
+            padding: 12px 28px;
+            border-radius: 40px;
+            font-weight: 600;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-secondary:hover {
+            background: #FEF3E8;
+            transform: translateY(-2px);
+        }
+
+        /* 通用section */
+        .section {
+            padding: 60px 0;
+        }
+        .section-title {
+            text-align: center;
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: #1e293b;
+        }
+        .section-sub {
+            text-align: center;
+            color: #5b6e8c;
+            max-width: 660px;
+            margin: 0 auto 48px auto;
+            font-size: 1.1rem;
+        }
+
+        /* 课程卡片网格 */
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+            gap: 32px;
+            margin-top: 16px;
+        }
+        .card {
+            background: #ffffff;
+            border-radius: 32px;
+            padding: 28px 24px 24px 24px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            border: 1px solid rgba(249,115,22,0.08);
+            text-align: center;
+        }
+        .card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 25px 40px -12px rgba(0, 0, 0, 0.15);
+            border-color: #ffdec2;
+        }
+        .card-icon {
+            font-size: 3rem;
+            color: #F97316;
+            background: #FFF2E6;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 24px;
+            margin: 0 auto 20px auto;
+        }
+        .card h3 {
+            font-size: 1.65rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: -0.3px;
+        }
+        .card-desc {
+            color: #475569;
+            margin-bottom: 16px;
+            line-height: 1.5;
+            flex: 1;
+            text-align: center;
+        }
+        .card-meta {
+            display: inline-block;
+            background: #FFF5EB;
+            color: #F97316;
+            font-size: 0.85rem;
+            font-weight: 500;
+            padding: 6px 16px;
+            border-radius: 40px;
+            margin-bottom: 20px;
+            text-align: center;
+            line-height: 1.4;
+        }
+        .card-meta i {
+            margin-right: 6px;
+            font-size: 0.8rem;
+        }
+        .card-btn {
+            background: transparent;
+            border: 1px solid #FFD8BE;
+            color: #F97316;
+            padding: 8px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            display: inline-block;
+            margin-top: 12px;
+            cursor: pointer;
+            align-self: center;
+        }
+        .card-btn:hover {
+            background: #F97316;
+            color: white;
+            border-color: #F97316;
+        }
+
+        /* 特色优势区域 */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 30px;
+            margin-top: 20px;
+        }
+        .feature-item {
+            background: white;
+            border-radius: 28px;
+            padding: 28px 20px;
+            text-align: center;
+            transition: 0.2s;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.03);
+            border: 1px solid #fff0e4;
+        }
+        .feature-icon {
+            font-size: 2.6rem;
+            background: #FFF2E6;
+            width: 72px;
+            height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 36px;
+            margin: 0 auto 20px auto;
+            color: #F97316;
+        }
+        .feature-item h4 {
+            font-size: 1.35rem;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+        .feature-item p {
+            color: #5b6e8c;
+        }
+
+        /* 考级竞赛专区 & 关于我们 样式 */
+        .exam-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 30px;
+        }
+        .exam-card {
+            background: white;
+            border-radius: 28px;
+            padding: 28px 20px;
+            text-align: center;
+            box-shadow: 0 12px 20px rgba(0,0,0,0.04);
+            border: 1px solid #f0e6df;
+            transition: transform 0.2s;
+        }
+        .exam-card:hover {
+            transform: translateY(-5px);
+        }
+        .exam-card i {
+            font-size: 2.8rem;
+            color: #F97316;
+            margin-bottom: 20px;
+        }
+        .exam-card h4 {
+            font-size: 1.4rem;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+        .exam-card p {
+            color: #5b6e8c;
+            line-height: 1.5;
+        }
+        .about-text {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+            font-size: 1.1rem;
+            color: #334155;
+            line-height: 1.6;
+        }
+        .about-stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 40px;
+            flex-wrap: wrap;
+        }
+        .stat {
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #F97316;
+        }
+
+        /* 底部 */
+        footer {
+            background: #1E2A3E;
+            color: #CBD5E1;
+            padding: 48px 0 24px;
+            margin-top: 40px;
+            border-radius: 32px 32px 0 0;
+        }
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 32px;
+            margin-bottom: 40px;
+        }
+        .footer-logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .footer-logo i {
+            color: #F97316;
+        }
+        .footer-links {
+            display: flex;
+            gap: 48px;
+            flex-wrap: wrap;
+        }
+        .footer-links div {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .footer-links h5 {
+            color: white;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .footer-links a {
+            color: #CBD5E1;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .footer-links a:hover {
+            color: #F97316;
+        }
+        .copyright {
+            text-align: center;
+            padding-top: 24px;
+            border-top: 1px solid #334155;
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 16px;
+                padding: 16px 20px;
+            }
+            .nav-links {
+                justify-content: center;
+                gap: 1.2rem;
+            }
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            .hero p {
+                font-size: 1rem;
+            }
+            .section-title {
+                font-size: 1.8rem;
+            }
+            .courses-grid {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+            .card {
+                padding: 24px;
+            }
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            .footer-links {
+                justify-content: center;
+                text-align: center;
+            }
+            .footer-logo {
+                justify-content: center;
+            }
+            .about-stats {
+                gap: 24px;
+            }
+            .exam-grid {
+                gap: 20px;
+            }
+        }
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 20px;
+            }
+            .hero-buttons {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .btn-primary, .btn-secondary {
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <div class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-fox"></i>
+                <span>少儿编程培训教务管理系统</span>
+            </div>
+            <div class="nav-links">
+                <a data-scroll="home">首页</a>
+                <a data-scroll="curriculum">课程体系</a>
+                <a data-scroll="camp">夏冬令营</a>
+                <a data-scroll="exam">考级专区</a>
+                <a data-scroll="about">关于我们</a>
+                <a href="#" class="btn-outline-light">免费试听</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero 区域 首页 -->
+    <div id="home" class="hero">
+        <div class="container hero-content">
+            <div class="hero-badge">
+                <i class="fas fa-graduation-cap"></i> 未来创造者基地
+            </div>
+            <h1>让代码成为孩子的<br>超能力语言</h1>
+            <p>三维狐少儿编程，专为3-16岁青少年提供专业、有趣、体系化的编程教育。从积木搭建到AI竞赛，陪伴孩子每一步成长。</p>
+            <div class="hero-buttons">
+                <a href="#" class="btn-primary"><i class="fas fa-rocket"></i> 开启编程之旅</a>
+                <a href="#" class="btn-secondary"><i class="fas fa-calendar-alt"></i> 预约体验课</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 课程体系区域 -->
+    <div id="curriculum" class="section">
+        <div class="container">
+            <div class="section-title">多元化课程体系</div>
+            <div class="section-sub">从启蒙到高阶，从兴趣到特长，打造孩子的核心竞争力</div>
+            <div class="courses-grid">
+                <div class="card">
+                    <div class="card-icon"><i class="fas fa-cubes"></i></div>
+                    <h3>积木搭建</h3>
+                    <div class="card-meta"><i class="fas fa-child"></i> 4-7岁 · 思维启蒙</div>
+                    <div class="card-desc">大颗粒积木与动力机械结合，培养空间想象力、动手能力和逻辑思维雏形，在游戏中搭建工程思维。</div>
+                    <a href="#" class="card-btn">探索课程 <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="card">
+                    <div class="card-icon"><i class="fas fa-puzzle-piece"></i></div>
+                    <h3>图形化编程</h3>
+                    <div class="card-meta"><i class="fas fa-child"></i> 6-10岁 · 兴趣进阶</div>
+                    <div class="card-desc">基于Scratch/Blockly，拖拽式编程创作动画、游戏，无缝过渡代码思维，轻松掌握编程逻辑。</div>
+                    <a href="#" class="card-btn">探索课程 <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="card">
+                    <div class="card-icon"><i class="fab fa-python"></i></div>
+                    <h3>Python编程</h3>
+                    <div class="card-meta"><i class="fas fa-laptop-code"></i> 8-12岁 · 代码核心</div>
+                    <div class="card-desc">人工智能首选语言，趣味项目实战：爬虫、数据分析、AI小应用，培养真正的代码能力与计算思维。</div>
+                    <a href="#" class="card-btn">探索课程 <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="card">
+                    <div class="card-icon"><i class="fas fa-code"></i></div>
+                    <h3>C++编程</h3>
+                    <div class="card-meta"><i class="fas fa-trophy"></i> 10岁+ · 竞赛直通</div>
+                    <div class="card-desc">信息学奥赛官方语言，深入算法与数据结构，为NOI/蓝桥杯等顶尖赛事打下扎实基础，冲刺名校。</div>
+                    <a href="#" class="card-btn">探索课程 <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="card">
+                    <div class="card-icon"><i class="fas fa-tree"></i></div>
+                    <h3>夏冬令营</h3>
+                    <div class="card-meta"><i class="fas fa-campground"></i> 6-15岁 · 主题营地</div>
+                    <div class="card-desc">寒暑假沉浸式编程营，结合户外探索+项目式学习，AI科创、硬件编程，让孩子在协作中激发创造力。</div>
+                    <a href="#" class="card-btn">查看营地 <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="card">
+                    <div class="card-icon"><i class="fas fa-medal"></i></div>
+                    <h3>考级竞赛</h3>
+                    <div class="card-meta"><i class="fas fa-chart-line"></i> 等级考试 · 权威赛事</div>
+                    <div class="card-desc">全国青少年编程等级考试、蓝桥杯、NOI系列竞赛专业辅导，历年真题集训，助力斩获证书与奖项。</div>
+                    <a href="#" class="card-btn">了解详情 <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 特色优势区域 -->
+    <div class="section" style="padding-top: 0;">
+        <div class="container">
+            <div class="section-title">为什么选择三维狐？</div>
+            <div class="section-sub">专业 · 趣味 · 成果导向，陪伴孩子赢在AI时代</div>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-chalkboard-user"></i></div>
+                    <h4>双师小班互动</h4>
+                    <p>985/211金牌讲师+辅导老师全程跟踪，关注每个孩子的学习进度与思维成长。</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-gamepad"></i></div>
+                    <h4>游戏化教学法</h4>
+                    <p>闯关式学习+项目制创作，让编程像搭建乐高一样有趣，学习效果提升300% 。</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+                    <h4>科学成长体系</h4>
+                    <p>对标CSTA标准 & 国内考级竞赛路径，从启蒙到信奥赛一站打通，升学优势尽在掌握。</p>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon"><i class="fas fa-trophy"></i></div>
+                    <h4>多元赛事出口</h4>
+                    <p>蓝桥杯、NOC、信息学奥赛等官方授权考点，历年获奖率超82%，成就孩子科技特长。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 夏冬令营专区 (夏令营菜单跳转) -->
+    <div id="camp" class="section" style="background: #FFF9F2; border-radius: 48px; margin: 0 24px 40px 24px;">
+        <div class="container" style="padding: 24px 0;">
+            <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 30px;">
+                <div style="flex: 1;">
+                    <span style="background:#FFE5D0; padding:6px 14px; border-radius: 40px; font-size: 0.8rem; font-weight: 600; color:#F97316;"><i class="fas fa-snowflake"></i> 早鸟优惠</span>
+                    <h2 style="font-size: 1.9rem; margin: 20px 0 12px; font-weight: 700;">2025 冬令营火热招募</h2>
+                    <p style="color: #475569; max-width: 500px;">AI创客营 · 算法集训营 · 游戏设计营，沉浸式编程体验，限时立减800元，赠全套硬件礼盒。</p>
+                    <a href="#" style="display: inline-block; margin-top: 20px; background: #F97316; color: white; padding: 10px 28px; border-radius: 40px; text-decoration: none; font-weight: 600;">立即占位 <i class="fas fa-chevron-right"></i></a>
+                </div>
+                <div style="flex: 0.5; text-align: center;">
+                    <i class="fas fa-calendar-alt" style="font-size: 5rem; color: #F97316; opacity: 0.6;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 考级竞赛专区 + 新增白名单赛事卡片 -->
+    <div id="exam" class="section">
+        <div class="container">
+            <div class="section-title">考级竞赛 · 权威认证</div>
+            <div class="section-sub">专业辅导，高通过率，为升学加码</div>
+            <div class="exam-grid">
+                <div class="exam-card">
+                    <i class="fas fa-book-open"></i>
+                    <h4>全国青少年等级考试</h4>
+                    <p>官方授权考点，1-8级阶梯式辅导，历年通过率96%，助力孩子获得权威证书。</p>
+                </div>
+                <div class="exam-card">
+                    <i class="fas fa-trophy"></i>
+                    <h4>蓝桥杯大赛</h4>
+                    <p>省赛/国赛直通车，金牌教练押题，省奖获奖率超85%，冲击国赛奖项。</p>
+                </div>
+                <div class="exam-card">
+                    <i class="fas fa-microchip"></i>
+                    <h4>NOI / 信奥赛</h4>
+                    <p>C++算法集训队，对标信息学奥赛，培养竞赛选手，冲刺省队及名校强基计划。</p>
+                </div>
+                <!-- 新增：白名单赛事助力升学卡片 -->
+                <div class="exam-card">
+                    <i class="fas fa-list-check"></i>
+                    <h4>白名单赛事</h4>
+                    <p>教育部认可的全国性竞赛活动（NOC、蓝桥杯等），获奖经历助力升学、综合素质评价，为名校录取增加重磅砝码。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 关于我们区域 -->
+    <div id="about" class="section" style="background: #FEFAF5; border-radius: 48px; margin: 0 24px;">
+        <div class="container">
+            <div class="section-title">关于三维狐</div>
+            <div class="about-text">
+                <p>三维狐少儿编程成立于2018年，专注于为3-16岁青少儿提供高品质编程教育。我们坚信，编程不仅是技能，更是面向未来的思维方式。</p>
+                <p style="margin-top: 16px;">目前在全国拥有20+直营校区，服务超过10万名学员，与多所重点中小学建立编程社团合作，致力于培养下一代科技创新人才。</p>
+            </div>
+            <div class="about-stats">
+                <div class="stat"><div class="stat-number">10w+</div><div>累计学员</div></div>
+                <div class="stat"><div class="stat-number">20+</div><div>直营校区</div></div>
+                <div class="stat"><div class="stat-number">96%</div><div>考级通过率</div></div>
+                <div class="stat"><div class="stat-number">300+</div><div>竞赛奖项</div></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部 Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <i class="fas fa-fox"></i> 三维狐少儿编程
+                </div>
+                <div class="footer-links">
+                    <div>
+                        <h5>课程中心</h5>
+                        <a href="#">积木搭建</a>
+                        <a href="#">图形化编程</a>
+                        <a href="#">Python</a>
+                        <a href="#">C++竞赛</a>
+                    </div>
+                    <div>
+                        <h5>营地与考级</h5>
+                        <a href="#">夏冬令营</a>
+                        <a href="#">等级考试</a>
+                        <a href="#">蓝桥杯辅导</a>
+                        <a href="#">信奥集训队</a>
+                    </div>
+                    <div>
+                        <h5>支持</h5>
+                        <a href="#">常见问题</a>
+                        <a href="#">联系我们</a>
+                        <a href="#">校区分布</a>
+                        <a href="#">家长社区</a>
+                    </div>
+                </div>
+            </div>
+            <div class="copyright">
+                <i class="far fa-copyright"></i> 2025 三维狐少儿编程 | 激发创造力，编程向未来 | 京ICP备2025123456号
+            </div>
+        </div>
+    </footer>
+
+    <!-- 平滑滚动及菜单跳转逻辑 -->
+    <script>
+        document.querySelectorAll('[data-scroll]').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('data-scroll');
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+        // 兼容传统锚点
+        document.querySelectorAll('.nav-links a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+                if(href && href !== "#" && href !== "#!" && href !== "#0") {
+                    const target = document.querySelector(href);
+                    if(target) {
+                        e.preventDefault();
+                        target.scrollIntoView({ behavior: 'smooth' });
+                    }
+                }
+            });
+        });
+        console.log("三维狐少儿编程 | 已新增白名单赛事卡片，助力升学板块");
+    </script>
+</body>
+</html>

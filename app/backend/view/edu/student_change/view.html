@@ -1,0 +1,136 @@
+{layout name="layout/main" /}
+<style>
+    html, body {height:100%;overflow:auto;background:#f5f7fb;}
+    .change-view-card {min-height:100%;}
+    .change-view-card .layui-card-body {max-height:calc(100vh - 90px);overflow-y:auto;box-sizing:border-box;}
+    @media (max-width:640px) {
+        .change-view-card .layui-form-label {width:auto;float:none;display:block;margin-bottom:8px;}
+        .change-view-card .layui-input-block {margin-left:0;}
+    }
+</style>
+<div class="layui-card change-view-card">
+    <div class="layui-card-header">
+        <h3 class="layui-card-title">查看学生异动</h3>
+    </div>
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane">
+            <div class="layui-form-item">
+                <label class="layui-form-label">学生姓名</label>
+                <div class="layui-input-block">
+                    <input type="text" value="{$formData.student_name|default=''}" class="layui-input" readonly>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">班级</label>
+                <div class="layui-input-block">
+                    <input type="text" value="{$formData.class_name|default=''}" class="layui-input" readonly>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">学员状态</label>
+                <div class="layui-input-block">
+                    <input type="text" value="{$formData.change_type_text|default=''}" class="layui-input" readonly>
+                </div>
+            </div>
+            {if isset($formData['change_type']) && (int)$formData['change_type']===1}
+            <div class="layui-form-item">
+                <label class="layui-form-label">请假开始时间</label>
+                <div class="layui-input-block">
+                    <input type="text" value="{$formData.leave_start_time|default=''}" class="layui-input" readonly>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">请假结束时间</label>
+                <div class="layui-input-block">
+                    <input type="text" value="{$formData.leave_end_time|default=''}" class="layui-input" readonly>
+                </div>
+            </div>
+            {/if}
+            {if isset($formData['change_type']) && (int)$formData['change_type']===2}
+            <div class="layui-form-item">
+                <label class="layui-form-label">旧课程</label>
+                <div class="layui-input-block">
+                    <input type="text" value="{$formData.old_course_name|default=''}" class="layui-input" readonly>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">新课程</label>
+                <div class="layui-input-block">
+                    <input type="text" value="{$formData.new_course_name|default=''}" class="layui-input" readonly>
+                </div>
+            </div>
+            {/if}
+            {if isset($formData['change_type']) && (int)$formData['change_type']===3}
+            <div class="layui-form-item">
+                <label class="layui-form-label">退费金额</label>
+                <div class="layui-input-block">
+                    <input type="text" value="{$formData.refund_amount|default='0'} 元" class="layui-input" readonly>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">退费明细</label>
+                <div class="layui-input-block">
+                    <textarea class="layui-textarea" readonly>{$formData.refund_detail|default=''}</textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">退费原因</label>
+                <div class="layui-input-block">
+                    <textarea class="layui-textarea" readonly>{$formData.refund_reason|default=''}</textarea>
+                </div>
+            </div>
+            {/if}
+            {if isset($formData['change_type']) && (int)$formData['change_type']===4}
+            <div class="layui-form-item">
+                <label class="layui-form-label">赠送课时数量</label>
+                <div class="layui-input-block">
+                    <input type="text" value="{$formData.gift_hours|default='0'}" class="layui-input" readonly>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">赠课原因</label>
+                <div class="layui-input-block">
+                    <textarea class="layui-textarea" readonly>{$formData.gift_reason|default=''}</textarea>
+                </div>
+            </div>
+            {/if}
+            {if isset($formData['change_type']) && (int)$formData['change_type']===5}
+            <div class="layui-form-item">
+                <label class="layui-form-label">删除课时</label>
+                <div class="layui-input-block">
+                    <input type="text" value="{$formData.delete_gift_hours|default='0'}" class="layui-input" readonly>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">删除原因</label>
+                <div class="layui-input-block">
+                    <textarea class="layui-textarea" readonly>{$formData.delete_gift_reason|default=''}</textarea>
+                </div>
+            </div>
+            {/if}
+            <div class="layui-form-item">
+                <label class="layui-form-label">备注</label>
+                <div class="layui-input-block">
+                    <textarea class="layui-textarea" readonly>{$formData.remark|default=''}</textarea>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">创建时间</label>
+                <div class="layui-input-block">
+                    <input type="text" value="{$formData.create_time|default=''}" class="layui-input" readonly>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">更新时间</label>
+                <div class="layui-input-block">
+                    <input type="text" value="{$formData.update_time|default=''}" class="layui-input" readonly>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button type="button" class="layui-btn layui-btn-primary" onclick="parent.layer.closeAll()"><i class="layui-icon layui-icon-close"></i> 关闭</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

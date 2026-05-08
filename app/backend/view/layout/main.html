@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>{:syscfg('site','sys_name')}后台管理</title>
+    <meta property="og:keywords" content="{:syscfg('site','site_seo_keywords')}" />
+    <meta property="og:description" content="{:syscfg('site','site_seo_desc')}" />
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="referrer" content="never">
+    <meta name="format-detection" content="telephone=no">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon"/>
+    <link rel="stylesheet" href="__CDN____PLUGINS__/layui/css/layui.css?v={:syscfg('site','site_version')}" media="all" />
+    <link rel="stylesheet" href="__CDN____STATIC__/backend/css/comm.css?v={:syscfg('site','site_version')}" media="all">
+    <link rel="stylesheet" href="__CDN____STATIC__/backend/css/global.css?v={:syscfg('site','site_version')}" media="all" />
+    <!--    <script src="__CDN____STATIC__/plugins/jquery/jquery-3.7.1.min.js"></script>-->
+    <script src="__CDN____PLUGINS__/layui/layui.js?v={:syscfg('site','site_version')}" charset="utf-8"></script>
+    {:token_meta()}
+    <script>
+        window.Config = {:json_encode($CONFIG)};
+        window.FormArray = {:isset($formData)?(json_encode($formData)):'""'},
+        window.STATIC ='__STATIC__'
+        window.PLUGINS = '__PLUGINS__';
+        window.APP = '{$APP}';
+        window.CONTROLLER = '{$CONTROLLER}';
+        window.ACTION = '{$ACTION}';
+
+        (function () {
+            function getResponsiveLayerArea(area) {
+                var width = window.innerWidth || document.documentElement.clientWidth || 0;
+                var height = window.innerHeight || document.documentElement.clientHeight || 0;
+                if (width <= 480) {
+                    return ['100vw', '100vh'];
+                }
+                if (width <= 768) {
+                    return ['96vw', Math.max(Math.floor(height * 0.92), 520) + 'px'];
+                }
+                if (width <= 1024) {
+                    return ['92vw', Math.max(Math.floor(height * 0.9), 600) + 'px'];
+                }
+                return area;
+            }
+
+            function patchLayerOpen() {
+                if (!window.layui || !layui.layer || layui.layer.__responsivePatched) {
+                    return;
+                }
+                var originalOpen = layui.layer.open;
+                layui.layer.open = function (options) {
+                    options = options || {};
+                    if (String(options.type || '') === '2') {
+                        options.maxmin = typeof options.maxmin === 'undefined' ? true : options.maxmin;
+                        options.shadeClose = typeof options.shadeClose === 'undefined' ? false : options.shadeClose;
+                        options.area = getResponsiveLayerArea(options.area);
+                        var originalSuccess = options.success;
+                        options.success = function (layero, index) {
+                            var width = window.innerWidth || document.documentElement.clientWidth || 0;
+                            if (width <= 480) {
+                                try { layui.layer.full(index); } catch (e) {}
+                            }
+                            if (typeof originalSuccess === 'function') {
+                                originalSuccess.call(this, layero, index);
+                            }
+                        };
+                    }
+                    return originalOpen.call(this, options);
+                };
+                layui.layer.__responsivePatched = true;
+            }
+
+            if (window.layui) {
+                patchLayerOpen();
+                window.addEventListener('resize', patchLayerOpen);
+            }
+        })();
+    </script>
+</head>
+
+<body class="backend-responsive-page" style="padding: 10px;background: #fff">
+
+<div class="fun-container responsive-container" id="app" style="">
+
+    {__CONTENT__}
+
+</div>
+</body>
+</html>
+<!--[if lt IE 9]>
+<script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+<script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+<![endif]-->
+<script defer src="__CDN____STATIC__/require.min.js?v={:syscfg('site','site_version')}" data-main="__CDN____STATIC__/js/require-backend{:syscfg('site','app_debug')?'':'.min'}.js?v={:syscfg('site','site_version')}" charset="utf-8"></script>
+
+{if !empty($formScript)}{$formScript|raw}{/if}
+{if !empty($tableScript)}{$tableScript|raw}{/if}

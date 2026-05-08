@@ -1,0 +1,246 @@
+{layout name="layout/main" /}
+<style>
+    html, body {
+        height: 100%;
+        overflow: auto;
+        background: #f5f7fb;
+    }
+    .student-form-card {
+        min-height: 100%;
+    }
+    .student-form-card .layui-card-body {
+        max-height: calc(100vh - 90px);
+        overflow-y: auto;
+        box-sizing: border-box;
+    }
+    .student-form-card .layui-form {
+        padding-bottom: 24px;
+    }
+    @media (max-width: 768px) {
+        .student-form-card .layui-form-label {
+            width: 100px;
+        }
+        .student-form-card .layui-input-block {
+            margin-left: 130px;
+        }
+    }
+    @media (max-width: 640px) {
+        .student-form-card .layui-form-label {
+            width: auto;
+            float: none;
+            display: block;
+            margin-bottom: 8px;
+        }
+        .student-form-card .layui-input-block {
+            margin-left: 0;
+        }
+    }
+</style>
+<div class="layui-card student-form-card">
+    <div class="layui-card-header">
+        <h3 class="layui-card-title">{if isset($formData['id'])}编辑学生{else}添加学生{/if}</h3>
+    </div>
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane" id="form"
+              action="{if isset($formData['id']) && $formData['id']}/backend/edu/student/edit?id={$formData['id']|default=''}{else}/backend/edu/student/add{/if}"
+              method="post">
+            <input type="hidden" name="id" value="{$formData['id']|default=''}">
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">学号</label>
+                <div class="layui-input-block">
+                    <input type="text" name="student_no" value="{$formData['student_no']|default=''}" class="layui-input" placeholder="自动生成" readonly>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">姓名 <span class="layui-form-must">*</span></label>
+                <div class="layui-input-block">
+                    <input type="text" name="name" value="{$formData['name']|default=''}" class="layui-input" placeholder="请输入姓名" required lay-verify="required">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">性别 <span class="layui-form-must">*</span></label>
+                <div class="layui-input-block">
+                    <input type="radio" name="gender" value="1" title="男" {if !isset($formData['gender']) || (int)$formData['gender']==1}checked{/if}>
+                    <input type="radio" name="gender" value="0" title="女" {if isset($formData['gender']) && (int)$formData['gender']==0}checked{/if}>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">邮箱</label>
+                <div class="layui-input-block">
+                    <input type="email" name="email" value="{$formData['email']|default=''}" class="layui-input" placeholder="请输入邮箱">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">地址</label>
+                <div class="layui-input-block">
+                    <input type="text" name="address" value="{$formData['address']|default=''}" class="layui-input" placeholder="请输入地址">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">联系人 <span class="layui-form-must">*</span></label>
+                <div class="layui-input-block">
+                    <input type="text" name="contact_name" value="{$formData['contact_name']|default=''}" class="layui-input" placeholder="请输入联系人" required lay-verify="required">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">联系电话 <span class="layui-form-must">*</span></label>
+                <div class="layui-input-block">
+                    <input type="text" name="phone" value="{$formData['phone']|default=''}" class="layui-input" placeholder="请输入联系电话" required lay-verify="required">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">班级 <span class="layui-form-must">*</span></label>
+                <div class="layui-input-block">
+                    <select name="class_id" lay-verify="required">
+                        <option value="">请选择班级</option>
+                        {foreach $classList as $classId => $className}
+                        <option value="{$classId}" {if isset($formData['class_id']) && (int)$formData['class_id']==(int)$classId}selected{/if}>{$className}</option>
+                        {/foreach}
+                    </select>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">课程 <span class="layui-form-must">*</span></label>
+                <div class="layui-input-block">
+                    <select name="course_id" lay-verify="required">
+                        <option value="">请选择课程</option>
+                        {foreach $courseList as $courseId => $courseName}
+                        <option value="{$courseId}" {if isset($formData['course_id']) && (int)$formData['course_id']==(int)$courseId}selected{/if}>{$courseName}</option>
+                        {/foreach}
+                    </select>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">总课时</label>
+                <div class="layui-input-block">
+                    <input type="text" name="total_hours" value="{$formData['total_hours']|default='0'}" class="layui-input" readonly>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">已用课时</label>
+                <div class="layui-input-block">
+                    <input type="text" name="used_hours" value="{$formData['used_hours']|default='0'}" class="layui-input" readonly>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">剩余课时</label>
+                <div class="layui-input-block">
+                    <input type="text" name="remaining_hours" value="{$formData['remaining_hours']|default='0'}" class="layui-input" readonly>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">续费赠课</label>
+                <div class="layui-input-block">
+                    <input type="text" name="enrollment_gift_hours" value="{$formData['enrollment_gift_hours']|default='0'}" class="layui-input" readonly>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">异动赠课</label>
+                <div class="layui-input-block">
+                    <input type="text" name="change_gift_hours" value="{$formData['change_gift_hours']|default='0'}" class="layui-input" readonly>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">删除赠课</label>
+                <div class="layui-input-block">
+                    <input type="text" name="delete_gift_hours" value="{$formData['delete_gift_hours']|default='0'}" class="layui-input" readonly>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">总赠课</label>
+                <div class="layui-input-block">
+                    <input type="text" name="gift_hours" value="{$formData['gift_hours']|default='0'}" class="layui-input" readonly>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">学生状态 <span class="layui-form-must">*</span></label>
+                <div class="layui-input-block">
+                    <select name="student_status" lay-verify="required">
+                        {volist name="studentStatusList" id="statusName" key="statusValue"}
+                        <option value="{$statusValue}" {if isset($formData['student_status']) && (int)$formData['student_status']==(int)$statusValue}selected{elseif !isset($formData['student_status']) && (int)$statusValue===1}selected{/if}>{$statusName}</option>
+                        {/volist}
+                    </select>
+                </div>
+            </div>
+
+            <div class="layui-form-item layui-form-text">
+                <label class="layui-form-label">学生备注</label>
+                <div class="layui-input-block">
+                    <textarea name="remark" class="layui-textarea" placeholder="请输入学生备注">{$formData['remark']|default=''}</textarea>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">系统状态</label>
+                <div class="layui-input-block">
+                    <input type="radio" name="status" value="1" title="正常" {if !isset($formData['status']) || (int)$formData['status']==1}checked{/if}>
+                    <input type="radio" name="status" value="2" title="禁用" {if isset($formData['status']) && (int)$formData['status']==2}checked{/if}>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button type="submit" class="layui-btn layui-btn-normal" lay-submit lay-filter="submit">
+                        <i class="layui-icon layui-icon-save"></i> 保存
+                    </button>
+                    <button type="button" class="layui-btn layui-btn-primary" onclick="parent.layer.closeAll()">
+                        <i class="layui-icon layui-icon-close"></i> 取消
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    layui.use(['form', 'layer'], function() {
+        var form = layui.form;
+        var layer = layui.layer;
+        form.render();
+
+        function refreshParentAndClose(resetPage) {
+            if (parent && typeof parent.__refreshStudentTable === 'function') {
+                parent.__refreshStudentTable(!!resetPage);
+            }
+            if (parent && parent.layer) {
+                var frameIndex = parent.layer.getFrameIndex(window.name);
+                parent.layer.close(frameIndex);
+            }
+        }
+
+        form.on('submit(submit)', function(data) {
+            $.post($('#form').attr('action'), data.field, function(res) {
+                if (res.code === 1) {
+                    layer.msg(res.msg, {icon: 1}, function() {
+                        refreshParentAndClose(false);
+                    });
+                } else {
+                    layer.msg(res.msg, {icon: 2});
+                }
+            }, 'json');
+            return false;
+        });
+
+        $(window).on('beforeunload', function() {
+            if (parent && typeof parent.__refreshStudentTable === 'function') {
+                parent.__refreshStudentTable(false);
+            }
+        });
+    });
+</script>

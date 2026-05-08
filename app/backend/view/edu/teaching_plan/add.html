@@ -1,0 +1,203 @@
+{layout name="layout/main" /}
+<div class="layui-card">
+    <div class="layui-card-header">
+        <h3 class="layui-card-title">{if isset($formData['id'])}编辑教案{else}上传教案{/if}</h3>
+    </div>
+
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane" id="form"
+              action="{if isset($formData['id']) && $formData['id']}/backend/edu/teaching_plan/edit?id={$formData['id']|default=''}{else}/backend/edu/teaching_plan/add{/if}"
+              method="post" enctype="multipart/form-data">
+            {:token_field()}
+            <input type="hidden" name="id" value="{$formData['id']|default=''}">
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">教案标题 <span class="layui-form-must">*</span></label>
+                <div class="layui-input-block">
+                    <input type="text" name="title" value="{$formData['title']|default=''}" class="layui-input"
+                           placeholder="请输入教案标题" required lay-verify="required">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">课程 <span class="layui-form-must">*</span></label>
+                <div class="layui-input-block">
+                    <select name="course_id" lay-verify="required">
+                        <option value="">请选择课程</option>
+                        {volist name="courseList" id="course"}
+                        <option value="{$course.id}" {if isset($formData['course_id']) && (int)$formData['course_id']==(int)$course['id']}selected{/if}>
+                            {$course.name}
+                        </option>
+                        {/volist}
+                    </select>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">分类 <span class="layui-form-must">*</span></label>
+                <div class="layui-input-block">
+                    <select name="category" lay-verify="required">
+                        <option value="">请选择分类</option>
+                        {volist name="categoryList" id="catname" key="catid"}
+                        <option value="{$catid}" {if isset($formData['category']) && (int)$formData['category']==(int)$catid}selected{/if}>
+                            {$catname}
+                        </option>
+                        {/volist}
+                    </select>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">教师 <span class="layui-form-must">*</span></label>
+                <div class="layui-input-block">
+                    <input type="hidden" name="teacher_id" value="{$formData['teacher_id']|default=''}">
+                    <input type="text" value="{$currentTeacherName|default=''}" class="layui-input" readonly>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">教案文件 <span class="layui-form-must">{if !isset($formData['id']) || !$formData['id']}*{/if}</span></label>
+                <div class="layui-input-block">
+                    <input type="file" name="file" class="layui-input" {if !isset($formData['id']) || !$formData['id']}required lay-verify="required"{/if}>
+                    {if isset($formData['file_name']) && $formData['file_name']}
+                    <div style="margin-top:8px;color:#666;">
+                        当前文件：{$formData['file_name']}
+                    </div>
+                    {/if}
+                    <div style="margin-top:8px;color:#999;">
+                        支持txt、doc、docx、pdf、xls、xlsx、zip、rar、7z格式，文件大小不超过10M{if isset($formData['id']) && $formData['id']}，不上传文件将保留原文件{/if}
+                    </div>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">状态</label>
+                <div class="layui-input-block">
+                    <input type="radio" name="status" value="1" title="正常"
+                           {if !isset($formData['status']) || (int)$formData['status']==1}checked{/if}>
+                    <input type="radio" name="status" value="0" title="禁用"
+                           {if isset($formData['status']) && (int)$formData['status']==0}checked{/if}>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button type="button" id="submitBtn" class="layui-btn layui-btn-normal">
+                        <i class="layui-icon layui-icon-upload"></i> 提交
+                    </button>
+                    <button type="button" class="layui-btn layui-btn-primary" onclick="parent.layer.closeAll()">
+                        <i class="layui-icon layui-icon-close"></i> 取消
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    layui.use(['form', 'layer'], function() {
+        var form = layui.form;
+        var layer = layui.layer;
+        form.render();
+
+        function refreshParentAndClose(resetPage) {
+            if (parent && typeof parent.__refreshTeachingPlanTable === 'function') {
+                parent.__refreshTeachingPlanTable(!!resetPage);
+            }
+            if (parent && parent.layer) {
+                var frameIndex = parent.layer.getFrameIndex(window.name);
+                parent.layer.close(frameIndex);
+            }
+        }
+
+        function submitTeachingPlan() {
+            var postUrl = document.getElementById('form').getAttribute('action');
+            var formEl = document.getElementById('form');
+            var fileInput = formEl.querySelector('input[name="file"]');
+            var tokenInput = formEl.querySelector('input[name="__token__"]');
+            var isEdit = !!formEl.querySelector('input[name="id"]').value;
+
+            if (!formEl.querySelector('input[name="title"]').value) {
+                layer.msg('请输入教案标题', {icon: 2});
+                return;
+            }
+            if (!formEl.querySelector('select[name="course_id"]').value) {
+                layer.msg('请选择课程', {icon: 2});
+                return;
+            }
+            if (!formEl.querySelector('select[name="category"]').value) {
+                layer.msg('请选择分类', {icon: 2});
+                return;
+            }
+            if (!formEl.querySelector('input[name="teacher_id"]').value) {
+                layer.msg('教师信息异常，请重新登录后再试', {icon: 2});
+                return;
+            }
+            if (!isEdit && (!fileInput || !fileInput.files || !fileInput.files.length)) {
+                layer.msg('请先选择教案文件', {icon: 2});
+                return;
+            }
+
+            var fd = new FormData();
+            fd.append('__token__', tokenInput ? tokenInput.value : '');
+            fd.append('id', formEl.querySelector('input[name="id"]').value || '');
+            fd.append('title', formEl.querySelector('input[name="title"]').value || '');
+            fd.append('course_id', formEl.querySelector('select[name="course_id"]').value || '');
+            fd.append('category', formEl.querySelector('select[name="category"]').value || '');
+            fd.append('teacher_id', formEl.querySelector('input[name="teacher_id"]').value || '');
+            fd.append('status', formEl.querySelector('input[name="status"]:checked') ? formEl.querySelector('input[name="status"]:checked').value : '1');
+
+            if (fileInput && fileInput.files && fileInput.files.length) {
+                fd.append('file', fileInput.files[0]);
+            }
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', postUrl, true);
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState !== 4) {
+                    return;
+                }
+
+                var newToken = xhr.getResponseHeader('__token__');
+                if (newToken && tokenInput) {
+                    tokenInput.value = newToken;
+                }
+
+                var res = {};
+                try {
+                    res = xhr.responseText ? JSON.parse(xhr.responseText) : {};
+                } catch (e) {
+                    res = {};
+                }
+
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    if (res && res.code === 1) {
+                        layer.msg(res.msg, {icon: 1}, function() {
+                            refreshParentAndClose(false);
+                        });
+                    } else {
+                        layer.msg((res && res.msg) || '操作失败', {icon: 2});
+                    }
+                } else {
+                    layer.msg((res && res.msg) || '提交失败', {icon: 2});
+                }
+            };
+            xhr.send(fd);
+        }
+
+        document.getElementById('submitBtn').addEventListener('click', function() {
+            submitTeachingPlan();
+        });
+
+        form.on('submit(submit)', function() {
+            return false;
+        });
+
+        window.addEventListener('beforeunload', function() {
+            if (parent && typeof parent.__refreshTeachingPlanTable === 'function') {
+                parent.__refreshTeachingPlanTable(false);
+            }
+        });
+    });
+</script>

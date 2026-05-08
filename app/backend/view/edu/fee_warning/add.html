@@ -1,0 +1,152 @@
+{layout name="layout/main" /}
+<style>
+    html, body {height:100%;overflow:auto;background:#f5f7fb;}
+    .fee-warning-form-card {min-height:100%;}
+    .fee-warning-form-card .layui-card-body {max-height:calc(100vh - 90px);overflow-y:auto;box-sizing:border-box;}
+    @media (max-width:640px) {
+        .fee-warning-form-card .layui-form-label {width:auto;float:none;display:block;margin-bottom:8px;}
+        .fee-warning-form-card .layui-input-block {margin-left:0;}
+    }
+</style>
+<div class="layui-card fee-warning-form-card">
+    <div class="layui-card-header"><h3 class="layui-card-title">{$title}费用预警</h3></div>
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane" id="form" action="{if isset($formData['id'])}/backend/edu/fee_warning/edit?id={$formData['id']}{else}/backend/edu/fee_warning/add{/if}" method="post">
+            <input type="hidden" name="id" value="{$formData['id']|default=''}">
+            <input type="hidden" name="student_id" id="student_id" value="{$formData['student_id']|default=''}">
+            <input type="hidden" name="class_id" id="class_id" value="{$formData['class_id']|default=''}">
+
+            <div class="layui-form-item"><label class="layui-form-label">预警单号</label><div class="layui-input-block"><input type="text" value="{if isset($formData['warning_no'])}{$formData['warning_no']}{else}保存后自动生成{/if}" class="layui-input" readonly></div></div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">搜索学生</label>
+                <div class="layui-input-block">
+                    <input type="text" name="student_keyword" id="student_keyword" value="{$formData['student_name']|default=''}" class="layui-input" placeholder="请输入学生姓名或学号后点击搜索" autocomplete="off">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button type="button" class="layui-btn layui-btn-primary" id="searchStudentBtn"><i class="layui-icon layui-icon-search"></i> 搜索学生</button>
+                </div>
+            </div>
+            <div class="layui-form-item"><label class="layui-form-label">学生姓名</label><div class="layui-input-block"><input type="text" id="student_name_display" value="{$formData['student_name']|default=''}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">班级</label><div class="layui-input-block"><input type="text" id="class_name_display" value="{$formData['class_name']|default=''}" class="layui-input" readonly></div></div>
+
+            <div class="layui-form-item"><label class="layui-form-label">预警类型</label><div class="layui-input-block"><select name="warning_type" lay-verify="required">{volist name="warningTypeList" id="typeName" key="typeValue"}<option value="{$typeValue}" {if isset($formData['warning_type']) && (int)$formData['warning_type']==(int)$typeValue}selected{/if}>{$typeName}</option>{/volist}</select></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">预警等级</label><div class="layui-input-block"><select name="warning_level" lay-verify="required">{volist name="warningLevelList" id="levelName" key="levelValue"}<option value="{$levelValue}" {if isset($formData['warning_level']) && (int)$formData['warning_level']==(int)$levelValue}selected{/if}>{$levelName}</option>{/volist}</select></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">触发值</label><div class="layui-input-block"><input type="number" name="trigger_value" value="{$formData['trigger_value']|default='0'}" class="layui-input" min="0" step="0.01"></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">阈值</label><div class="layui-input-block"><input type="number" name="threshold_value" value="{$formData['threshold_value']|default='0'}" class="layui-input" min="0" step="0.01"></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">最近到课</label><div class="layui-input-block"><input type="date" name="last_attendance_date" value="{$formData['last_attendance_date']|default=''}" class="layui-input"></div></div>
+            <div class="layui-form-item layui-form-text"><label class="layui-form-label">预警内容</label><div class="layui-input-block"><textarea name="warning_content" class="layui-textarea" placeholder="请输入预警内容">{$formData['warning_content']|default=''}</textarea></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">跟进状态</label><div class="layui-input-block"><select name="follow_status" lay-verify="required">{volist name="followStatusList" id="statusName" key="statusValue"}<option value="{$statusValue}" {if isset($formData['follow_status']) && (int)$formData['follow_status']==(int)$statusValue}selected{/if}>{$statusName}</option>{/volist}</select></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">跟进人</label><div class="layui-input-block"><select name="follow_admin_id"><option value="0">未指定</option>{volist name="adminList" id="adminName" key="adminId"}<option value="{$adminId}" {if isset($formData['follow_admin_id']) && (int)$formData['follow_admin_id']==(int)$adminId}selected{/if}>{$adminName}</option>{/volist}</select></div></div>
+            <div class="layui-form-item layui-form-text"><label class="layui-form-label">跟进备注</label><div class="layui-input-block"><textarea name="follow_remark" class="layui-textarea" placeholder="请输入跟进备注">{$formData['follow_remark']|default=''}</textarea></div></div>
+            <div class="layui-form-item" style="display:none;"><label class="layui-form-label">状态</label><div class="layui-input-block"><input type="radio" name="status" value="1" title="正常" {if !isset($formData['status']) || (int)$formData['status']==1}checked{/if}><input type="radio" name="status" value="2" title="禁用" {if isset($formData['status']) && (int)$formData['status']==2}checked{/if}></div></div>
+            <div class="layui-form-item"><div class="layui-input-block"><button type="submit" class="layui-btn layui-btn-normal" lay-submit lay-filter="submit"><i class="layui-icon layui-icon-save"></i> 保存</button><button type="button" class="layui-btn layui-btn-primary" onclick="parent.layer.closeAll()"><i class="layui-icon layui-icon-close"></i> 取消</button></div></div>
+        </form>
+    </div>
+</div>
+<script>
+layui.use(['form','layer','jquery'], function(){
+    var form = layui.form, layer = layui.layer, $ = layui.jquery;
+    var submitting = false;
+    form.render();
+
+    function setStudent(student){
+        $('#student_id').val(student.id || '');
+        $('#class_id').val(student.class_id || '');
+        $('#student_name_display').val(student.name || '');
+        $('#class_name_display').val(student.class_name || '');
+        $('#student_keyword').val(student.name || '');
+    }
+
+    function normalizeKeyword(value){
+        return $.trim(value || '').toLowerCase();
+    }
+
+    function rankStudents(list, keyword){
+        var normalizedKeyword = normalizeKeyword(keyword);
+        return $.map(list || [], function(item){
+            var name = normalizeKeyword(item.name || '');
+            var studentNo = normalizeKeyword(item.student_no || '');
+            var rank = 999;
+            if(name === normalizedKeyword){ rank = 1; }
+            else if(studentNo === normalizedKeyword){ rank = 2; }
+            else if(name.indexOf(normalizedKeyword) === 0){ rank = 3; }
+            else if(studentNo.indexOf(normalizedKeyword) === 0){ rank = 4; }
+            else if(name.indexOf(normalizedKeyword) !== -1){ rank = 5; }
+            else if(studentNo.indexOf(normalizedKeyword) !== -1){ rank = 6; }
+            else { return null; }
+            item.__rank = rank;
+            return item;
+        }).sort(function(a, b){
+            if(a.__rank !== b.__rank){ return a.__rank - b.__rank; }
+            return Number(a.id || 0) - Number(b.id || 0);
+        });
+    }
+
+    function refreshParentAndClose(){ if(parent && typeof parent.__refreshFeeWarningTable === 'function'){ parent.__refreshFeeWarningTable(false); } if(parent && parent.layer){ var frameIndex = parent.layer.getFrameIndex(window.name); parent.layer.close(frameIndex); } }
+
+    function searchStudent(){
+        var keyword = $.trim($('#student_keyword').val());
+        if(!keyword){ layer.msg('请输入学生姓名或学号', {icon:2}); return; }
+        $.ajax({
+            url:'/backend/edu/student/index',
+            type:'GET',
+            data:{keyword:keyword, page:1, limit:50},
+            dataType:'json',
+            success:function(res){
+                var matchedList = rankStudents(res && res.data ? res.data : [], keyword);
+                if(!matchedList.length){ layer.msg('没有找到该学生', {icon:2}); return; }
+                if(matchedList[0].__rank <= 2){
+                    setStudent(matchedList[0]);
+                    layer.msg('已自动精确匹配学生并同步班级', {icon:1});
+                    return;
+                }
+                if(matchedList.length === 1){
+                    setStudent(matchedList[0]);
+                    layer.msg('已自动选中学生并同步班级', {icon:1});
+                    return;
+                }
+                var displayList = matchedList.slice(0, 10);
+                var html = '<div style="padding:12px;">';
+                $.each(displayList, function(_, item){
+                    html += '<div class="choose-student-item" data-id="' + item.id + '" data-name="' + (item.name || '') + '" data-class-id="' + (item.class_id || '') + '" data-class="' + (item.class_name || '') + '" style="padding:10px 12px;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:8px;cursor:pointer;">'
+                        + '<div style="font-weight:700;color:#111827;">' + (item.name || '') + '</div>'
+                        + '<div style="font-size:12px;color:#6b7280;margin-top:4px;">学号：' + (item.student_no || '') + '　班级：' + (item.class_name || '') + '</div>'
+                        + '</div>';
+                });
+                html += '</div>';
+                layer.open({
+                    type:1,
+                    title:'请选择学生',
+                    area:['520px','420px'],
+                    content:html,
+                    success:function(layero, index){
+                        $(layero).find('.choose-student-item').on('click', function(){
+                            setStudent({id:$(this).data('id'), name:$(this).data('name'), class_id:$(this).data('class-id'), class_name:$(this).data('class')});
+                            layer.close(index);
+                        });
+                    }
+                });
+            },
+            error:function(){
+                layer.msg('搜索失败，请稍后重试', {icon:2});
+            }
+        });
+    }
+
+    $('#searchStudentBtn').on('click', function(){ searchStudent(); });
+    $('#student_keyword').on('keydown', function(e){ if((e.key && e.key === 'Enter') || e.keyCode === 13){ e.preventDefault(); searchStudent(); } });
+
+    form.on('submit(submit)', function(data){
+        if(submitting){ return false; }
+        if(!$.trim(data.field.student_id || '')){ layer.msg('请先搜索并选择学生', {icon:2}); return false; }
+        submitting = true;
+        var $submitButton = $('#form').find('button[lay-filter="submit"]');
+        $submitButton.addClass('layui-btn-disabled').prop('disabled', true);
+        $.ajax({ url: $('#form').attr('action'), type:'POST', data:data.field, dataType:'json', success:function(res){ if(res && res.code === 1){ layer.msg(res.msg || '保存成功', {icon:1}, function(){ refreshParentAndClose(); }); } else { layer.msg((res && res.msg) || '保存失败', {icon:2}); } }, error:function(){ layer.msg('保存失败', {icon:2}); }, complete:function(){ submitting = false; $submitButton.removeClass('layui-btn-disabled').prop('disabled', false); } });
+        return false;
+    });
+});
+</script>

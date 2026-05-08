@@ -1,0 +1,209 @@
+{layout name="layout/main" /}
+<style>
+    :root{
+        --fee-bg:#f4f7fb;
+        --fee-card:#ffffff;
+        --fee-line:#e5edf7;
+        --fee-title:#17325f;
+        --fee-muted:#6b7c93;
+        --fee-blue:#2f68ff;
+        --fee-purple:#6658ff;
+        --fee-green:#17b26a;
+        --fee-orange:#ff9f43;
+    }
+    html,body{background:linear-gradient(180deg,#f3f7ff,#eef3fb);min-height:100%;}
+    .fee-page{padding:18px;}
+    .fee-hero{padding:20px 22px;border-radius:24px;background:linear-gradient(135deg,#17325f 0%,#2b4f92 45%,#4a79d9 100%);color:#fff;box-shadow:0 18px 60px rgba(35,63,123,.24);}
+    .fee-title{font-size:28px;font-weight:800;letter-spacing:.5px;}
+    .fee-subtitle{margin-top:8px;color:rgba(255,255,255,.82);line-height:1.8;font-size:14px;max-width:920px;}
+    .summary-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px;margin-top:18px;}
+    .summary-card{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:14px 16px;backdrop-filter:blur(10px);}
+    .summary-label{font-size:12px;color:rgba(255,255,255,.72);}
+    .summary-value{margin-top:8px;font-size:24px;font-weight:800;color:#fff;}
+    .fee-main{margin-top:18px;background:var(--fee-card);border:1px solid var(--fee-line);border-radius:24px;box-shadow:0 14px 38px rgba(15,23,42,.06);padding:16px;}
+    .fee-toolbar{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:14px;}
+    .fee-toolbar .layui-form-item{margin-bottom:0;}
+    .fee-toolbar .layui-form-label{border-radius:12px 0 0 12px!important;}
+    .fee-toolbar .layui-input,.fee-toolbar .layui-btn,.fee-toolbar .layui-form-select .layui-input{border-radius:12px!important;}
+    .fee-note{font-size:12px;color:var(--fee-muted);}
+    .hour-price-box{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+    .price-tag{display:inline-flex;align-items:center;height:38px;padding:0 14px;border-radius:999px;background:#eef4ff;color:#17325f;font-weight:700;}
+    .layui-table-view{border:none!important;border-radius:18px;overflow:hidden;}
+    .layui-table th{background:#f4f8ff!important;color:#17325f!important;font-weight:700;}
+    .layui-table td,.layui-table th{border-color:#edf2fb!important;}
+    .money-text{color:#ffffff;font-weight:800;display:inline-block;padding:2px 8px;border-radius:999px;background:linear-gradient(135deg,#2f68ff,#6658ff);}
+    .hours-text{font-weight:800;color:#17325f;}
+    .btn-calc{background:linear-gradient(135deg,#2f68ff,#6658ff)!important;border:none!important;}
+    @media (max-width:1400px){.summary-grid{grid-template-columns:repeat(3,minmax(0,1fr));}}
+    @media (max-width:768px){.summary-grid{grid-template-columns:repeat(2,minmax(0,1fr));}.fee-page{padding:12px;}.fee-main{padding:12px;}}
+    @media (max-width:540px){.summary-grid{grid-template-columns:1fr;}.fee-toolbar{align-items:stretch;}}
+</style>
+<div class="fee-page" data-default-username="{$currentUsername|default=''}" data-can-switch="{if isset($canSwitchTeacher) && $canSwitchTeacher}1{else}0{/if}" data-saved-hour-price="{$savedHourPrice|default='0'}">
+    <div class="fee-hero">
+        <div class="fee-title">教师课时费</div>
+        <div class="fee-subtitle">读取班级总课时与课时管理中的实际课时，按教师统计当年 / 当月 / 当天上课课时。输入课时费后，系统自动按“课时数 × 课时费”计算教师课时费用。</div>
+        <div class="summary-grid">
+            <div class="summary-card"><div class="summary-label">教师数</div><div class="summary-value" id="sumTeacherCount">0</div></div>
+            <div class="summary-card"><div class="summary-label">班级数</div><div class="summary-value" id="sumClassCount">0</div></div>
+            <div class="summary-card"><div class="summary-label">当年课时</div><div class="summary-value" id="sumYearHours">0</div></div>
+            <div class="summary-card"><div class="summary-label">当月课时</div><div class="summary-value" id="sumMonthHours">0</div></div>
+            <div class="summary-card"><div class="summary-label">当天课时</div><div class="summary-value" id="sumDayHours">0</div></div>
+            <div class="summary-card"><div class="summary-label">当前课时费</div><div class="summary-value" id="sumHourPrice">0</div></div>
+        </div>
+    </div>
+
+    <div class="fee-main">
+        <div class="fee-toolbar">
+            <div class="layui-form layui-form-pane" lay-filter="searchForm" style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">老师</label>
+                    <div class="layui-input-inline" style="width:180px;">
+                        <input type="text" name="keyword" class="layui-input" value="{$currentUsername|default=''}" placeholder="姓名或账号" {if isset($canSwitchTeacher) && !$canSwitchTeacher}readonly{/if}>
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">年份</label>
+                    <div class="layui-input-inline" style="width:120px;">
+                        <input type="number" name="year" class="layui-input" value="{:date(\"Y\")}" placeholder="年份">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">月份</label>
+                    <div class="layui-input-inline" style="width:120px;">
+                        <input type="number" name="month" class="layui-input" value="{:date(\"n\")}" placeholder="1-12">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <label class="layui-form-label">日期</label>
+                    <div class="layui-input-inline" style="width:160px;">
+                        <input type="date" name="class_date" class="layui-input" value="{:date(\"Y-m-d\")}">
+                    </div>
+                </div>
+                <div class="layui-form-item">
+                    <button class="layui-btn btn-calc" lay-submit lay-filter="search"><i class="layui-icon layui-icon-search"></i> 计算课时费</button>
+                    <button class="layui-btn layui-btn-primary" lay-submit lay-filter="reset"><i class="layui-icon layui-icon-refresh"></i> 重置</button>
+                </div>
+            </div>
+            <div class="hour-price-box">
+                <div class="fee-note">课时费用按钮：输入单价后自动精准计算当年 / 当月 / 当天费用</div>
+                <span class="price-tag">课时费（元/课时）</span>
+                <input type="number" id="hourPriceInput" class="layui-input" style="width:140px;" min="0" step="0.01" value="{$savedHourPrice|default='0'}" placeholder="请输入课时费">
+                <button type="button" class="layui-btn layui-btn-normal" id="saveHourPriceBtn"><i class="layui-icon layui-icon-ok"></i> 保存</button>
+            </div>
+        </div>
+        <table class="layui-hide" id="table" lay-filter="table"></table>
+    </div>
+</div>
+<script>
+layui.use(['table','form','layer'], function(){
+    var table = layui.table;
+    var form = layui.form;
+    var layer = layui.layer;
+    var $ = layui.$;
+    var tableId = 'TeacherHourFeeTable';
+    var pageRoot = $('.fee-page');
+    var defaultUsername = pageRoot.data('default-username') || '';
+    var canSwitchTeacher = String(pageRoot.data('can-switch')) === '1';
+    var savedHourPrice = String(pageRoot.data('saved-hour-price') || '0');
+
+    function getSearchWhere(){
+        var keyword = $.trim($('input[name="keyword"]').val()) || defaultUsername;
+        if(!canSwitchTeacher){
+            keyword = defaultUsername;
+            $('input[name="keyword"]').val(defaultUsername);
+        }
+        return {
+            keyword: keyword,
+            year: $.trim($('input[name="year"]').val()),
+            month: $.trim($('input[name="month"]').val()),
+            class_date: $.trim($('input[name="class_date"]').val()),
+            hour_price: $.trim($('#hourPriceInput').val()) || savedHourPrice
+        };
+    }
+
+    function renderSummary(summary, filters){
+        summary = summary || {};
+        filters = filters || {};
+        $('#sumTeacherCount').text(summary.teacher_count || 0);
+        $('#sumClassCount').text(summary.class_count || 0);
+        $('#sumYearHours').text(summary.year_hours || 0);
+        $('#sumMonthHours').text(summary.month_hours || 0);
+        $('#sumDayHours').text(summary.day_hours || 0);
+        $('#sumHourPrice').text(filters.hour_price || savedHourPrice);
+    }
+
+    function reloadTable(resetPage){
+        var options = {where:getSearchWhere()};
+        if(resetPage){ options.page = {curr:1}; }
+        table.reload(tableId, options);
+    }
+
+    table.render({
+        elem:'#table',
+        id:tableId,
+        url:'/backend/edu/teacher_hour/index',
+        defaultToolbar:['filter','exports','print'],
+        response:{statusCode:0},
+        where:getSearchWhere(),
+        parseData:function(res){
+            renderSummary((res.extra && res.extra.summary) || {}, (res.extra && res.extra.filters) || {});
+            return res;
+        },
+        cols:[[
+            {field:'teacher_name', title:'老师', minWidth:140, templet:function(d){ return '<div style="font-weight:800;color:#17325f;">' + (d.teacher_name || '') + '</div><div style="font-size:12px;color:#7c8aa5;">' + (d.teacher_username || '') + '</div>'; }},
+            {field:'class_count', title:'带班数', width:90},
+            {field:'current_students', title:'学生数', width:90},
+            {field:'total_class_hours', title:'班级总课时', width:110, templet:function(d){ return '<span class="hours-text">' + d.total_class_hours + '</span>'; }},
+            {field:'total_actual_hours', title:'累计实际课时', width:120, templet:function(d){ return '<span class="hours-text">' + d.total_actual_hours + '</span>'; }},
+            {field:'year_actual_hours', title:'当年课时', width:100, templet:function(d){ return '<span class="hours-text">' + d.year_actual_hours + '</span>'; }},
+            {field:'month_actual_hours', title:'当月课时', width:100, templet:function(d){ return '<span class="hours-text">' + d.month_actual_hours + '</span>'; }},
+            {field:'day_actual_hours', title:'当天课时', width:100, templet:function(d){ return '<span class="hours-text">' + d.day_actual_hours + '</span>'; }},
+            {field:'hour_price', title:'课时费', width:90, templet:function(d){ return '<span class="money-text">' + d.hour_price + '</span>'; }},
+            {field:'year_fee', title:'当年费用', width:110, templet:function(d){ return '<span class="money-text">' + d.year_fee + '</span>'; }},
+            {field:'month_fee', title:'当月费用', width:110, templet:function(d){ return '<span class="money-text">' + d.month_fee + '</span>'; }},
+            {field:'day_fee', title:'当天费用', width:110, templet:function(d){ return '<span class="money-text">' + d.day_fee + '</span>'; }}
+        ]],
+        page:true,
+        limit:10,
+        limits:[10,20,30,50],
+        text:{none:'暂无教师课时费数据'}
+    });
+
+    form.on('submit(search)', function(){
+        reloadTable(true);
+        return false;
+    });
+
+    form.on('submit(reset)', function(){
+        form.val('searchForm', {
+            keyword:defaultUsername,
+            year:'{:date("Y")}',
+            month:'{:date("n")}',
+            class_date:'{:date("Y-m-d")}'
+        });
+        $('#hourPriceInput').val(savedHourPrice);
+        reloadTable(true);
+        return false;
+    });
+
+    $('#hourPriceInput').on('input', function(){
+        reloadTable(false);
+    });
+
+    $('#saveHourPriceBtn').on('click', function(){
+        var hourPrice = $.trim($('#hourPriceInput').val()) || 0;
+        $.post('/backend/edu/teacher_hour/save_price', {hour_price: hourPrice}, function(res){
+            if(res.code === 1){
+                savedHourPrice = String(hourPrice);
+                $('#hourPriceInput').val(hourPrice);
+                $('#sumHourPrice').text(hourPrice);
+                layer.msg(res.msg || '保存成功', {icon:1}, function(){
+                    reloadTable(false);
+                });
+            }else{
+                layer.msg(res.msg || '保存失败', {icon:2});
+            }
+        }, 'json');
+    });
+});
+</script>

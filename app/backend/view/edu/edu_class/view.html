@@ -1,0 +1,148 @@
+{layout name="layout/main" /}
+<style>
+    html, body {height:100%;overflow:auto;background:#f4f7fb;}
+    .class-view-page {padding:16px;}
+    .class-view-card {border-radius:18px;overflow:hidden;box-shadow:0 10px 30px rgba(15,23,42,.08);margin-bottom:16px;border:none;}
+    .class-view-card .layui-card-header {background:linear-gradient(135deg,#17325f,#284b8f);color:#fff;border:none;}
+    .class-view-card .layui-card-title {color:#fff;font-size:18px;font-weight:700;}
+    .class-summary-grid {display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;}
+    .summary-item {background:linear-gradient(180deg,#f8fbff,#edf4ff);border:1px solid #dbe7ff;border-radius:14px;padding:14px 16px;}
+    .summary-label {font-size:12px;color:#6b7c93;}
+    .summary-value {margin-top:8px;font-size:20px;font-weight:800;color:#17325f;word-break:break-all;}
+    .class-detail-grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;}
+    .detail-item {background:#fff;border:1px solid #edf2f7;border-radius:14px;padding:14px 16px;min-height:84px;}
+    .detail-item.full {grid-column:1 / -1;}
+    .detail-label {font-size:12px;color:#7b8794;}
+    .detail-value {margin-top:8px;font-size:16px;color:#1f2937;font-weight:700;line-height:1.7;word-break:break-all;}
+    .student-count-badge {display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:34px;padding:0 12px;border-radius:999px;background:#17325f;color:#fff;font-weight:800;}
+    .student-toolbar {display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+    .student-toolbar .desc {font-size:13px;color:#6b7c93;}
+    .table-wrap {overflow:auto;}
+    .student-table {width:100%;min-width:980px;border-collapse:separate;border-spacing:0;background:#fff;border:1px solid #edf2f7;border-radius:14px;overflow:hidden;}
+    .student-table thead th {background:#f6f9ff;color:#17325f;font-size:13px;font-weight:700;padding:12px;border-bottom:1px solid #e6eefc;white-space:nowrap;}
+    .student-table tbody td {padding:12px;border-bottom:1px solid #edf2f7;color:#334155;font-size:13px;vertical-align:top;}
+    .student-table tbody tr:last-child td {border-bottom:none;}
+    .status-tag {display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;}
+    .status-tag.green {background:#e8fff5;color:#0f9d68;}
+    .status-tag.blue {background:#ecf5ff;color:#2563eb;}
+    .status-tag.orange {background:#fff7e8;color:#d97706;}
+    .status-tag.gray {background:#f1f5f9;color:#64748b;}
+    .empty-box {padding:36px 20px;text-align:center;color:#94a3b8;background:#fff;border:1px dashed #d7e3f4;border-radius:14px;}
+    @media (max-width:960px){.class-summary-grid,.class-detail-grid{grid-template-columns:1fr 1fr;}}
+    @media (max-width:640px){.class-view-page{padding:10px;}.class-summary-grid,.class-detail-grid{grid-template-columns:1fr;}}
+</style>
+<div class="class-view-page">
+    <div class="layui-card class-view-card">
+        <div class="layui-card-header">
+            <h3 class="layui-card-title">班级基础信息</h3>
+        </div>
+        <div class="layui-card-body">
+            <div class="class-summary-grid" style="margin-bottom:16px;">
+                <div class="summary-item">
+                    <div class="summary-label">班级编号</div>
+                    <div class="summary-value">{$formData.class_no|default=''}</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">班级名称</div>
+                    <div class="summary-value">{$formData.name|default=''}</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">教师</div>
+                    <div class="summary-value">{$formData.teacher_name|default=''}</div>
+                </div>
+                <div class="summary-item">
+                    <div class="summary-label">当前学生数</div>
+                    <div class="summary-value"><span class="student-count-badge">{$studentList|count}</span></div>
+                </div>
+            </div>
+
+            <div class="class-detail-grid">
+                <div class="detail-item">
+                    <div class="detail-label">课程</div>
+                    <div class="detail-value">{$formData.course_name|default=''}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">教室</div>
+                    <div class="detail-value">{$formData.classroom|default=''}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">上课时间</div>
+                    <div class="detail-value">{$formData.class_time|default=''}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">班级状态</div>
+                    <div class="detail-value">{$formData.status_text|default=''}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">最大人数</div>
+                    <div class="detail-value">{$formData.max_students|default='0'}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">总课时 / 已用 / 剩余</div>
+                    <div class="detail-value">{$formData.total_hours|default='0'} / {$formData.used_hours|default='0'} / {$formData.remaining_hours|default='0'}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-card class-view-card">
+        <div class="layui-card-header">
+            <h3 class="layui-card-title">班级学生</h3>
+        </div>
+        <div class="layui-card-body">
+            <div class="student-toolbar">
+                <div class="desc">学生数据直接读取学生管理模块中该班级下的学员信息。</div>
+                <button type="button" class="layui-btn layui-btn-primary" onclick="parent.layer.closeAll()"><i class="layui-icon layui-icon-close"></i> 关闭</button>
+            </div>
+
+            {if !empty($studentList)}
+            <div class="table-wrap">
+                <table class="student-table">
+                    <thead>
+                    <tr>
+                        <th>学号</th>
+                        <th>姓名</th>
+                        <th>性别</th>
+                        <th>联系电话</th>
+                        <th>联系人</th>
+                        <th>课程</th>
+                        <th>总课时</th>
+                        <th>剩余课时</th>
+                        <th>学生状态</th>
+                        <th>系统状态</th>
+                        <th>备注</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {volist name="studentList" id="student"}
+                    <tr>
+                        <td>{$student.student_no|default=''}</td>
+                        <td>{$student.name|default=''}</td>
+                        <td>{$student.gender_text|default=''}</td>
+                        <td>{$student.phone|default=''}</td>
+                        <td>{$student.contact_name|default=''}</td>
+                        <td>{$student.course_name|default=''}</td>
+                        <td>{$student.total_hours|default='0'}</td>
+                        <td>{$student.remaining_hours|default='0'}</td>
+                        <td>
+                            <span class="status-tag {if $student.student_status == 1}green{elseif $student.student_status == 2}orange{else /}gray{/if}">
+                                {$student.student_status_text|default=''}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="status-tag {if $student.status == 1}blue{else /}gray{/if}">
+                                {$student.status_text|default=''}
+                            </span>
+                        </td>
+                        <td>{$student.remark|default='-'}</td>
+                    </tr>
+                    {/volist}
+                    </tbody>
+                </table>
+            </div>
+            {else /}
+            <div class="empty-box">当前班级下暂无学生数据</div>
+            {/if}
+        </div>
+    </div>
+</div>

@@ -1,0 +1,60 @@
+{layout name="layout/main" /}
+<div class="layui-card">
+    <div class="layui-card-header"><h3 class="layui-card-title">教务预警中心</h3></div>
+    <div class="layui-card-body">
+        <div class="layui-form layui-form-pane" lay-filter="search">
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">关键词</label>
+                    <div class="layui-input-inline" style="width:300px;">
+                        <input type="text" name="keyword" placeholder="编号 / 标题 / 内容 / 来源 / 处理备注" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <button class="layui-btn layui-btn-primary" lay-submit lay-filter="search"><i class="layui-icon layui-icon-search"></i> 搜索</button>
+                    <button class="layui-btn layui-btn-primary" lay-submit lay-filter="reset"><i class="layui-icon layui-icon-refresh"></i> 重置</button>
+                </div>
+            </div>
+        </div>
+        <table class="layui-hide" id="table" lay-filter="table"></table>
+    </div>
+</div>
+<script type="text/html" id="toolbar"><div class="layui-btn-container"><button class="layui-btn layui-btn-sm" lay-event="add"><i class="layui-icon layui-icon-add-circle"></i> 添加预警</button></div></script>
+<script type="text/html" id="warning_level_tpl">
+    {{# if(d.warning_level == 1){ }}<span class="layui-badge">提示</span>{{# } }}
+    {{# if(d.warning_level == 2){ }}<span class="layui-badge layui-bg-blue">一般</span>{{# } }}
+    {{# if(d.warning_level == 3){ }}<span class="layui-badge layui-bg-orange">重要</span>{{# } }}
+    {{# if(d.warning_level == 4){ }}<span class="layui-badge layui-bg-red">紧急</span>{{# } }}
+</script>
+<script type="text/html" id="warning_status_tpl">
+    {{# if(d.warning_status == 1){ }}<span style="color:#d97706;font-weight:700;">待处理</span>{{# } }}
+    {{# if(d.warning_status == 2){ }}<span style="color:#2563eb;font-weight:700;">处理中</span>{{# } }}
+    {{# if(d.warning_status == 3){ }}<span style="color:#16a34a;font-weight:700;">已处理</span>{{# } }}
+    {{# if(d.warning_status == 4){ }}<span style="color:#6b7280;font-weight:700;">已忽略</span>{{# } }}
+</script>
+<script type="text/html" id="action"><div class="layui-btn-group"><button class="layui-btn layui-btn-xs" lay-event="view"><i class="layui-icon layui-icon-eye"></i> 查看</button><button class="layui-btn layui-btn-xs layui-btn-normal" lay-event="edit"><i class="layui-icon layui-icon-edit"></i> 编辑</button><button class="layui-btn layui-btn-xs layui-btn-danger" lay-event="delete"><i class="layui-icon layui-icon-delete"></i> 删除</button></div></script>
+<script>
+layui.use(['table','form','layer'], function(){
+    var table = layui.table, form = layui.form, layer = layui.layer;
+    var tableId = 'WarningCenterTable';
+    function reloadTable(resetPage){ table.reload(tableId, resetPage ? {page:{curr:1}} : {}); }
+    function openForm(title, url){ layer.open({type:2,title:title,content:url,area:['980px','760px'],maxmin:true,shadeClose:false,end:function(){reloadTable(false);}}); }
+    table.render({ elem:'#table', id:tableId, url:'/backend/edu/warning_center/index', toolbar:'#toolbar', defaultToolbar:['filter','exports','print'], cols:[[
+        {field:'id', title:'ID', width:70},
+        {field:'warning_no', title:'预警编号', width:140},
+        {field:'warning_title', title:'预警标题', width:180},
+        {field:'warning_category_text', title:'分类', width:100},
+        {field:'warning_level', title:'等级', width:90, templet:'#warning_level_tpl'},
+        {field:'warning_source_type', title:'来源类型', width:120},
+        {field:'source_id', title:'来源ID', width:90},
+        {field:'warning_status', title:'处理状态', width:100, templet:'#warning_status_tpl'},
+        {field:'warning_content', title:'预警内容', minWidth:240},
+        {toolbar:'#action', title:'操作', width:180, fixed:'right'}
+    ]], page:true, limit:10, limits:[10,20,30,50], text:{none:'暂无预警'}});
+    table.on('toolbar(table)', function(obj){ if(obj.event === 'add'){ openForm('添加教务预警', '/backend/edu/warning_center/add'); } });
+    table.on('tool(table)', function(obj){ var data = obj.data; if(obj.event === 'view'){ openForm('查看教务预警', '/backend/edu/warning_center/view?id=' + data.id); } if(obj.event === 'edit'){ openForm('编辑教务预警', '/backend/edu/warning_center/edit?id=' + data.id); } if(obj.event === 'delete'){ layer.confirm('确定删除这条预警吗？', function(index){ $.post('/backend/edu/warning_center/delete', {id:data.id}, function(res){ if(res.code === 1){ layer.msg(res.msg,{icon:1},function(){reloadTable(false);}); } else { layer.msg(res.msg,{icon:2}); } }, 'json'); layer.close(index); }); } });
+    form.on('submit(search)', function(data){ table.reload(tableId, {where:data.field, page:{curr:1}}); return false; });
+    form.on('submit(reset)', function(){ form.val('search', {keyword:''}); table.reload(tableId, {where:{}, page:{curr:1}}); return false; });
+    window.__refreshWarningCenterTable = function(resetPage){ reloadTable(!!resetPage); };
+});
+</script>

@@ -1,0 +1,92 @@
+{layout name="layout/main" /}
+<div class="layui-card">
+    <div class="layui-card-header">
+        <h3 class="layui-card-title">查看教具申请</h3>
+    </div>
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane">
+            <div class="layui-form-item">
+                <label class="layui-form-label">申请编号</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input" value="{$formData['apply_no']|default=''}" readonly>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">教具名称</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input" value="{$formData['item_name']|default=''}" readonly>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">数量</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input" value="{$formData['quantity']|default=''}" readonly>
+                </div>
+            </div>
+
+            <div class="layui-form-item layui-form-text">
+                <label class="layui-form-label">用途说明</label>
+                <div class="layui-input-block">
+                    <textarea class="layui-textarea" readonly>{$formData['purpose']|default=''}</textarea>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">需求日期</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input" value="{$formData['need_time']|default=''}" readonly>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">申请教师</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input" value="{if isset($teacher['nickname']) && $teacher['nickname']}{$teacher['nickname']}{elseif isset($teacher['realname']) && $teacher['realname']}{$teacher['realname']}{else /}{$teacher['username']|default=$formData['teacher_id']}{/if}" readonly>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">申请时间</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input" value="{$formData['apply_time_text']|default=''}" readonly>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">当前状态</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input" value="{$statusList[$formData['status']]|default=''}" readonly>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">审批人</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input" value="{if isset($approver['nickname']) && $approver['nickname']}{$approver['nickname']}{elseif isset($approver['realname']) && $approver['realname']}{$approver['realname']}{else /}{$approver['username']|default=''}{/if}" readonly>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">审批时间</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input" value="{$formData['approve_time_text']|default=''}" readonly>
+                </div>
+            </div>
+
+            <div class="layui-form-item layui-form-text">
+                <label class="layui-form-label">审批备注</label>
+                <div class="layui-input-block">
+                    <textarea class="layui-textarea" readonly>{$formData['approve_remark']|default=''}</textarea>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button type="button" class="layui-btn layui-btn-primary" onclick="parent.layer.closeAll()">关闭</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

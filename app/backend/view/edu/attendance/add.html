@@ -1,0 +1,53 @@
+{layout name="layout/main" /}
+<style>
+    html, body {height:100%;overflow:auto;background:#f5f7fb;}
+    .attendance-form-card {min-height:100%;}
+    .attendance-form-card .layui-card-body {max-height:calc(100vh - 90px);overflow-y:auto;box-sizing:border-box;}
+    @media (max-width:640px) {
+        .attendance-form-card .layui-form-label {width:auto;float:none;display:block;margin-bottom:8px;}
+        .attendance-form-card .layui-input-block {margin-left:0;}
+    }
+</style>
+<div class="layui-card attendance-form-card">
+    <div class="layui-card-header"><h3 class="layui-card-title">{$title}考勤记录</h3></div>
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane" id="form" action="{if isset($formData['id'])}/backend/edu/attendance/edit?id={$formData['id']}{else}/backend/edu/attendance/add{/if}" method="post">
+            <input type="hidden" name="id" value="{$formData['id']|default=''}">
+            <div class="layui-form-item"><label class="layui-form-label">考勤单号</label><div class="layui-input-block"><input type="text" value="{if isset($formData['attendance_no'])}{$formData['attendance_no']}{else}保存后自动生成{/if}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">课时记录</label><div class="layui-input-block"><select name="class_hour_id" lay-verify="required"><option value="">请选择课时记录</option>{volist name="classHourList" id="recordNo" key="classHourId"}<option value="{$classHourId}" {if isset($formData['class_hour_id']) && (int)$formData['class_hour_id']==(int)$classHourId}selected{/if}>{$recordNo}</option>{/volist}</select></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">班级</label><div class="layui-input-block"><select name="class_id" lay-verify="required"><option value="">请选择班级</option>{volist name="classList" id="className" key="classId"}<option value="{$classId}" {if isset($formData['class_id']) && (int)$formData['class_id']==(int)$classId}selected{/if}>{$classId} - {$className}</option>{/volist}</select></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">学生</label><div class="layui-input-block"><select name="student_id" lay-verify="required"><option value="">请选择学生</option>{volist name="studentList" id="studentName" key="studentId"}<option value="{$studentId}" {if isset($formData['student_id']) && (int)$formData['student_id']==(int)$studentId}selected{/if}>{$studentName}</option>{/volist}</select></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">教师</label><div class="layui-input-block"><select name="teacher_id" lay-verify="required"><option value="">请选择教师</option>{volist name="teacherList" id="teacherName" key="teacherId"}<option value="{$teacherId}" {if isset($formData['teacher_id']) && (int)$formData['teacher_id']==(int)$teacherId}selected{/if}>{$teacherName}</option>{/volist}</select></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">考勤日期</label><div class="layui-input-block"><input type="date" name="attendance_date" value="{$formData['attendance_date']|default=''}" class="layui-input" lay-verify="required"></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">考勤状态</label><div class="layui-input-block"><select name="attendance_status" lay-verify="required">{volist name="attendanceStatusList" id="statusName" key="statusValue"}<option value="{$statusValue}" {if isset($formData['attendance_status']) && (int)$formData['attendance_status']==(int)$statusValue}selected{/if}>{$statusName}</option>{/volist}</select></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">迟到分钟</label><div class="layui-input-block"><input type="number" name="minutes_late" value="{$formData['minutes_late']|default='0'}" class="layui-input" min="0" step="1"></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">早退分钟</label><div class="layui-input-block"><input type="number" name="minutes_leave_early" value="{$formData['minutes_leave_early']|default='0'}" class="layui-input" min="0" step="1"></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">扣减课时</label><div class="layui-input-block"><input type="number" name="deduct_hours" value="{$formData['deduct_hours']|default='0'}" class="layui-input" min="0" step="0.01"></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">补课调整单</label><div class="layui-input-block"><select name="makeup_schedule_adjust_id"><option value="0">无</option>{volist name="scheduleAdjustList" id="adjustNo" key="adjustId"}<option value="{$adjustId}" {if isset($formData['makeup_schedule_adjust_id']) && (int)$formData['makeup_schedule_adjust_id']==(int)$adjustId}selected{/if}>{$adjustNo}</option>{/volist}</select></div></div>
+            <div class="layui-form-item layui-form-text"><label class="layui-form-label">备注</label><div class="layui-input-block"><textarea name="remark" class="layui-textarea" placeholder="请输入备注">{$formData['remark']|default=''}</textarea></div></div>
+            <div class="layui-form-item" style="display:none;"><label class="layui-form-label">状态</label><div class="layui-input-block"><input type="radio" name="status" value="1" title="正常" {if !isset($formData['status']) || (int)$formData['status']==1}checked{/if}><input type="radio" name="status" value="2" title="禁用" {if isset($formData['status']) && (int)$formData['status']==2}checked{/if}></div></div>
+            <div class="layui-form-item"><div class="layui-input-block"><button type="submit" class="layui-btn layui-btn-normal" lay-submit lay-filter="submit"><i class="layui-icon layui-icon-save"></i> 保存</button><button type="button" class="layui-btn layui-btn-primary" onclick="parent.layer.closeAll()"><i class="layui-icon layui-icon-close"></i> 取消</button></div></div>
+        </form>
+    </div>
+</div>
+<script>
+layui.use(['form','layer'], function(){
+    var form = layui.form, layer = layui.layer;
+    var submitting = false;
+    form.render();
+    function refreshParentAndClose(){ if(parent && typeof parent.__refreshAttendanceTable === 'function'){ parent.__refreshAttendanceTable(false); } if(parent && parent.layer){ var frameIndex = parent.layer.getFrameIndex(window.name); parent.layer.close(frameIndex); } }
+    form.on('submit(submit)', function(data){
+        if(submitting){ return false; }
+        submitting = true;
+        var $submitButton = $('#form').find('button[lay-filter="submit"]');
+        $submitButton.addClass('layui-btn-disabled').prop('disabled', true);
+        $.ajax({
+            url: $('#form').attr('action'), type:'POST', data:data.field, dataType:'json',
+            success:function(res){ if(res && res.code === 1){ layer.msg(res.msg || '保存成功', {icon:1}, function(){ refreshParentAndClose(); }); } else { layer.msg((res && res.msg) || '保存失败', {icon:2}); } },
+            error:function(){ layer.msg('保存失败', {icon:2}); },
+            complete:function(){ submitting = false; $submitButton.removeClass('layui-btn-disabled').prop('disabled', false); }
+        });
+        return false;
+    });
+});
+</script>

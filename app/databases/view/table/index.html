@@ -1,0 +1,45 @@
+<table class="layui-table" id="list" lay-filter="list"
+></table>
+<script>
+    $('.layui-layer-title').val('记录1');
+    let result = {:json_encode($result)};
+    layui.use(['table'], function(){
+        let $ = layui.$,
+            table = layui.table;
+
+        //动态组装列数据
+        let cols = [
+        ];
+        //根据result渲染列
+        let length = result.length;
+        for(let i=0; i<length; i++){
+            cols.push({field: result[i]['Field'], title: result[i]['Comment'], minWidth: (result[i]['width'])>80?result[i]['width']:'80'});
+        }
+
+        //表格渲染
+        let tableIns = table.render({
+            elem: '#list' //表单挂载对象
+            ,url: 'indexData?'   //获取数据的后台接口
+            ,cols: [cols]
+            ,text: {
+                none: '暂无相关数据！'
+            }
+            // ,where:{delivery_time: '1579142378'} //默认查找条件，where属性可不设置
+            ,page: true    //是否打开分页
+
+            ,limits: [10, 15, 20, 25, 50, 100,500],
+            limit: 15
+            ,parseData: function(res) {
+                return {
+                    code: res.code,
+                    msg: res.msg,
+                    count: res.count,
+                    data: res.data
+                }
+            }
+            ,done:function(res, curr, count){
+            }
+        });
+    });
+</script>
+

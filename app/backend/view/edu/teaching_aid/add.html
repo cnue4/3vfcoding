@@ -1,0 +1,96 @@
+{layout name="layout/main" /}
+<div class="layui-card">
+    <div class="layui-card-header">
+        <h3 class="layui-card-title">{if isset($formData['id'])}编辑教具申请{else}申请教具{/if}</h3>
+    </div>
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane" id="form"
+              action="{if isset($formData['id']) && $formData['id']}/backend/edu/teaching_aid/edit?id={$formData['id']|default=''}{else}/backend/edu/teaching_aid/add{/if}"
+              method="post">
+            {:token_field()}
+            <input type="hidden" name="id" value="{$formData['id']|default=''}">
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">教具名称 <span class="layui-form-must">*</span></label>
+                <div class="layui-input-block">
+                    <input type="text" name="item_name" value="{$formData['item_name']|default=''}"
+                           class="layui-input" placeholder="请输入教具名称" required lay-verify="required">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">数量 <span class="layui-form-must">*</span></label>
+                <div class="layui-input-block">
+                    <input type="number" name="quantity" value="{$formData['quantity']|default=''}"
+                           class="layui-input" placeholder="请输入数量" min="1" step="1"
+                           required lay-verify="required">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">用途说明 <span class="layui-form-must">*</span></label>
+                <div class="layui-input-block">
+                    <textarea name="purpose" class="layui-textarea" placeholder="请输入用途说明"
+                              required lay-verify="required">{$formData['purpose']|default=''}</textarea>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">需求日期 <span class="layui-form-must">*</span></label>
+                <div class="layui-input-block">
+                    <input type="date" name="need_time" value="{$formData['need_time']|default=''}"
+                           class="layui-input" required lay-verify="required">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button type="submit" class="layui-btn layui-btn-normal" lay-submit lay-filter="submit">
+                        <i class="layui-icon layui-icon-save"></i> 保存
+                    </button>
+                    <button type="button" class="layui-btn layui-btn-primary" onclick="parent.layer.closeAll()">
+                        <i class="layui-icon layui-icon-close"></i> 取消
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    layui.use(['form', 'layer'], function() {
+        var form = layui.form;
+        var layer = layui.layer;
+        form.render();
+
+        function refreshParentAndClose(resetPage) {
+            if (parent && typeof parent.__refreshTeachingAidTable === 'function') {
+                parent.__refreshTeachingAidTable(!!resetPage);
+            }
+            if (parent && parent.layer) {
+                var frameIndex = parent.layer.getFrameIndex(window.name);
+                parent.layer.close(frameIndex);
+            }
+        }
+
+        form.on('submit(submit)', function(data) {
+            var postUrl = $('#form').attr('action');
+            $.post(postUrl, data.field, function(res) {
+                if (res.code === 1) {
+                    layer.msg(res.msg, {icon: 1}, function() {
+                        refreshParentAndClose(false);
+                    });
+                } else {
+                    layer.msg(res.msg, {icon: 2});
+                }
+            }, 'json');
+            return false;
+        });
+
+        $(window).on('beforeunload', function() {
+            if (parent && typeof parent.__refreshTeachingAidTable === 'function') {
+                parent.__refreshTeachingAidTable(false);
+            }
+        });
+    });
+</script>

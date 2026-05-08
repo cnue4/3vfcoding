@@ -1,0 +1,42 @@
+{layout name="layout/main" /}
+<style>
+    html, body {height:100%;overflow:auto;background:#f5f7fb;}
+    .warning-center-form-card {min-height:100%;}
+    .warning-center-form-card .layui-card-body {max-height:calc(100vh - 90px);overflow-y:auto;box-sizing:border-box;}
+    @media (max-width:640px) {
+        .warning-center-form-card .layui-form-label {width:auto;float:none;display:block;margin-bottom:8px;}
+        .warning-center-form-card .layui-input-block {margin-left:0;}
+    }
+</style>
+<div class="layui-card warning-center-form-card">
+    <div class="layui-card-header"><h3 class="layui-card-title">{$title}教务预警</h3></div>
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane" id="form" action="{if isset($formData['id'])}/backend/edu/warning_center/edit?id={$formData['id']}{else}/backend/edu/warning_center/add{/if}" method="post">
+            <input type="hidden" name="id" value="{$formData['id']|default=''}">
+            <div class="layui-form-item"><label class="layui-form-label">预警编号</label><div class="layui-input-block"><input type="text" value="{if isset($formData['warning_no'])}{$formData['warning_no']}{else}保存后自动生成{/if}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">预警标题</label><div class="layui-input-block"><input type="text" name="warning_title" value="{$formData['warning_title']|default=''}" class="layui-input" placeholder="请输入预警标题" lay-verify="required"></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">预警分类</label><div class="layui-input-block"><select name="warning_category" lay-verify="required">{volist name="warningCategoryList" id="categoryName" key="categoryValue"}<option value="{$categoryValue}" {if isset($formData['warning_category']) && (int)$formData['warning_category']==(int)$categoryValue}selected{/if}>{$categoryName}</option>{/volist}</select></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">预警等级</label><div class="layui-input-block"><select name="warning_level" lay-verify="required">{volist name="warningLevelList" id="levelName" key="levelValue"}<option value="{$levelValue}" {if isset($formData['warning_level']) && (int)$formData['warning_level']==(int)$levelValue}selected{/if}>{$levelName}</option>{/volist}</select></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">来源类型</label><div class="layui-input-block"><input type="text" name="warning_source_type" value="{$formData['warning_source_type']|default=''}" class="layui-input" placeholder="如 schedule_adjust / attendance / fee_warning" lay-verify="required"></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">来源业务ID</label><div class="layui-input-block"><input type="number" name="source_id" value="{$formData['source_id']|default='0'}" class="layui-input" min="0" step="1"></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">班级</label><div class="layui-input-block"><select name="class_id"><option value="0">未关联</option>{volist name="classList" id="className" key="classId"}<option value="{$classId}" {if isset($formData['class_id']) && (int)$formData['class_id']==(int)$classId}selected{/if}>{$className}</option>{/volist}</select></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">学生</label><div class="layui-input-block"><select name="student_id"><option value="0">未关联</option>{volist name="studentList" id="studentName" key="studentId"}<option value="{$studentId}" {if isset($formData['student_id']) && (int)$formData['student_id']==(int)$studentId}selected{/if}>{$studentName}</option>{/volist}</select></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">教师</label><div class="layui-input-block"><select name="teacher_id"><option value="0">未关联</option>{volist name="adminList" id="adminName" key="adminId"}<option value="{$adminId}" {if isset($formData['teacher_id']) && (int)$formData['teacher_id']==(int)$adminId}selected{/if}>{$adminName}</option>{/volist}</select></div></div>
+            <div class="layui-form-item layui-form-text"><label class="layui-form-label">预警内容</label><div class="layui-input-block"><textarea name="warning_content" class="layui-textarea" placeholder="请输入预警内容">{$formData['warning_content']|default=''}</textarea></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">处理状态</label><div class="layui-input-block"><select name="warning_status" lay-verify="required">{volist name="warningStatusList" id="statusName" key="statusValue"}<option value="{$statusValue}" {if isset($formData['warning_status']) && (int)$formData['warning_status']==(int)$statusValue}selected{/if}>{$statusName}</option>{/volist}</select></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">责任人</label><div class="layui-input-block"><select name="responsible_admin_id"><option value="0">未指定</option>{volist name="adminList" id="adminName" key="adminId"}<option value="{$adminId}" {if isset($formData['responsible_admin_id']) && (int)$formData['responsible_admin_id']==(int)$adminId}selected{/if}>{$adminName}</option>{/volist}</select></div></div>
+            <div class="layui-form-item layui-form-text"><label class="layui-form-label">处理备注</label><div class="layui-input-block"><textarea name="handle_remark" class="layui-textarea" placeholder="请输入处理备注">{$formData['handle_remark']|default=''}</textarea></div></div>
+            <div class="layui-form-item" style="display:none;"><label class="layui-form-label">状态</label><div class="layui-input-block"><input type="radio" name="status" value="1" title="正常" {if !isset($formData['status']) || (int)$formData['status']==1}checked{/if}><input type="radio" name="status" value="2" title="禁用" {if isset($formData['status']) && (int)$formData['status']==2}checked{/if}></div></div>
+            <div class="layui-form-item"><div class="layui-input-block"><button type="submit" class="layui-btn layui-btn-normal" lay-submit lay-filter="submit"><i class="layui-icon layui-icon-save"></i> 保存</button><button type="button" class="layui-btn layui-btn-primary" onclick="parent.layer.closeAll()"><i class="layui-icon layui-icon-close"></i> 取消</button></div></div>
+        </form>
+    </div>
+</div>
+<script>
+layui.use(['form','layer'], function(){
+    var form = layui.form, layer = layui.layer;
+    var submitting = false;
+    form.render();
+    function refreshParentAndClose(){ if(parent && typeof parent.__refreshWarningCenterTable === 'function'){ parent.__refreshWarningCenterTable(false); } if(parent && parent.layer){ var frameIndex = parent.layer.getFrameIndex(window.name); parent.layer.close(frameIndex); } }
+    form.on('submit(submit)', function(data){ if(submitting){ return false; } submitting = true; var $submitButton = $('#form').find('button[lay-filter="submit"]'); $submitButton.addClass('layui-btn-disabled').prop('disabled', true); $.ajax({ url: $('#form').attr('action'), type:'POST', data:data.field, dataType:'json', success:function(res){ if(res && res.code === 1){ layer.msg(res.msg || '保存成功', {icon:1}, function(){ refreshParentAndClose(); }); } else { layer.msg((res && res.msg) || '保存失败', {icon:2}); } }, error:function(){ layer.msg('保存失败', {icon:2}); }, complete:function(){ submitting = false; $submitButton.removeClass('layui-btn-disabled').prop('disabled', false); } }); return false; });
+});
+</script>

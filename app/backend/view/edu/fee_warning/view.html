@@ -1,0 +1,30 @@
+{layout name="layout/main" /}
+<style>
+    html, body {height:100%;overflow:auto;background:#f5f7fb;}
+    .fee-warning-view-card {min-height:100%;}
+    .fee-warning-view-card .layui-card-body {max-height:calc(100vh - 90px);overflow-y:auto;box-sizing:border-box;}
+    @media (max-width:640px) {
+        .fee-warning-view-card .layui-form-label {width:auto;float:none;display:block;margin-bottom:8px;}
+        .fee-warning-view-card .layui-input-block {margin-left:0;}
+    }
+</style>
+<div class="layui-card fee-warning-view-card">
+    <div class="layui-card-header"><h3 class="layui-card-title">查看费用预警</h3></div>
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane">
+            <div class="layui-form-item"><label class="layui-form-label">预警单号</label><div class="layui-input-block"><input type="text" value="{$formData.warning_no|default=''}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">学生</label><div class="layui-input-block"><input type="text" value="{$formData.student_name|default=''}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">班级</label><div class="layui-input-block"><input type="text" value="{$formData.class_name|default=''}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">课程</label><div class="layui-input-block"><input type="text" value="{$formData.course_name|default=''}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">预警类型</label><div class="layui-input-block"><input type="text" value="{$formData.warning_type_text|default=''}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">预警等级</label><div class="layui-input-block"><input type="text" value="{$formData.warning_level_text|default=''}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">触发值</label><div class="layui-input-block"><input type="text" value="{$formData.trigger_value|default='0'}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">阈值</label><div class="layui-input-block"><input type="text" value="{$formData.threshold_value|default='0'}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">最近到课</label><div class="layui-input-block"><input type="text" value="{$formData.last_attendance_date|default=''}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">跟进状态</label><div class="layui-input-block"><input type="text" value="{$formData.follow_status_text|default=''}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item layui-form-text"><label class="layui-form-label">预警内容</label><div class="layui-input-block"><textarea class="layui-textarea" readonly>{$formData.warning_content|default=''}</textarea></div></div>
+            <div class="layui-form-item layui-form-text"><label class="layui-form-label">跟进备注</label><div class="layui-input-block"><textarea class="layui-textarea" readonly>{$formData.follow_remark|default=''}</textarea></div></div>
+            <div class="layui-form-item"><div class="layui-input-block"><button type="button" class="layui-btn layui-btn-primary" onclick="parent.layer.closeAll()"><i class="layui-icon layui-icon-close"></i> 关闭</button></div></div>
+        </form>
+    </div>
+</div>

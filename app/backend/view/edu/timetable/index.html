@@ -1,0 +1,71 @@
+{layout name="layout/main" /}
+<style>
+:root{--tt-bg:#f4f7fb;--tt-card:#fff;--tt-line:#e5ebf5;--tt-text:#1f2937;--tt-soft:#64748b;--tt-primary:#2563eb;--tt-danger:#ef4444;--tt-danger-bg:#fff1f2;--tt-success:#0f766e;--tt-warning:#f97316;--tt-warning-bg:#fff7ed}
+body{background:var(--tt-bg)}
+.timetable-shell{display:grid;gap:16px}.timetable-card{background:var(--tt-card);border:1px solid var(--tt-line);border-radius:18px;box-shadow:0 10px 30px rgba(15,23,42,.04)}
+.timetable-card .layui-card-header{height:auto;line-height:normal;padding:18px 22px 0;border-bottom:none}.timetable-card .layui-card-body{padding:18px 22px 22px}
+.timetable-title{margin:0;font-size:24px;font-weight:700;color:var(--tt-text)}.timetable-subtitle{margin-top:8px;color:var(--tt-soft);font-size:13px}
+.timetable-search-row{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap}.timetable-search-row .layui-form-item{margin-bottom:0}
+.timetable-metrics,.today-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.metric-box,.today-box{border-radius:16px;padding:16px 18px;border:1px solid var(--tt-line);background:linear-gradient(180deg,#fff 0%,#f8fbff 100%)}
+.metric-box.metric-conflict{background:linear-gradient(180deg,#fff 0%,#fff5f5 100%);border-color:#fecaca}.metric-box.metric-safe{background:linear-gradient(180deg,#fff 0%,#f0fdfa 100%);border-color:#99f6e4}
+.today-box.today-course{background:linear-gradient(180deg,#fff 0%,#eff6ff 100%);border-color:#bfdbfe}.today-box.today-first{background:linear-gradient(180deg,#fff 0%,#fff7ed 100%);border-color:#fed7aa}.today-box.today-last{background:linear-gradient(180deg,#fff 0%,#f0fdf4 100%);border-color:#bbf7d0}
+.metric-label,.today-label{color:var(--tt-soft);font-size:13px}.metric-value,.today-value{margin-top:8px;font-size:30px;font-weight:800;color:var(--tt-text)}
+.teacher-meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}.teacher-pill{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:#f8fafc;border:1px solid var(--tt-line);color:var(--tt-soft);font-size:13px}.teacher-pill strong{color:var(--tt-text)}
+.conflict-board{border-radius:16px;border:1px solid #fecaca;background:linear-gradient(180deg,#fff 0%,#fff5f5 100%);padding:16px}.conflict-board.is-empty{border-color:#bbf7d0;background:linear-gradient(180deg,#fff 0%,#f0fdf4 100%)}.conflict-title{font-size:16px;font-weight:700;color:var(--tt-text);margin-bottom:12px}
+.conflict-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.72);border:1px solid rgba(239,68,68,.15);margin-bottom:10px}.conflict-item:last-child{margin-bottom:0}.conflict-tag{display:inline-flex;align-items:center;padding:4px 10px;border-radius:999px;background:var(--tt-danger);color:#fff;font-size:12px;font-weight:700;white-space:nowrap}
+.week-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:14px}.day-column{border-radius:18px;border:1px solid var(--tt-line);background:#fcfdff;min-height:300px;display:flex;flex-direction:column;overflow:hidden}.day-header{padding:14px 14px 10px;border-bottom:1px solid var(--tt-line);background:linear-gradient(180deg,#fff 0%,#f8fbff 100%)}.day-title{font-size:16px;font-weight:700;color:var(--tt-text)}.day-count{margin-top:4px;font-size:12px;color:var(--tt-soft)}.day-body{padding:12px;display:grid;gap:10px;align-content:start}
+.lesson-card{border-radius:14px;border:1px solid #dbe6f5;background:#fff;padding:12px;box-shadow:0 4px 12px rgba(15,23,42,.04)}.lesson-card.is-conflict{border-color:#fca5a5;background:var(--tt-danger-bg);box-shadow:0 8px 20px rgba(239,68,68,.12)}.lesson-time{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:var(--tt-primary);padding:4px 10px;border-radius:999px;background:#eef4ff}.lesson-card.is-conflict .lesson-time{color:var(--tt-danger);background:#ffe4e6}.lesson-name{margin-top:10px;font-size:16px;font-weight:700;color:var(--tt-text);line-height:1.4}.lesson-course{margin-top:6px;color:var(--tt-soft);font-size:13px}.lesson-meta{display:grid;gap:6px;margin-top:10px;font-size:12px;color:var(--tt-soft)}.lesson-alert{margin-top:10px;display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:var(--tt-danger);color:#fff;font-size:12px;font-weight:700}.day-empty,.empty-shell{padding:28px 12px;text-align:center;color:#94a3b8;font-size:13px}
+@media (max-width:1400px){.week-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}@media (max-width:980px){.timetable-metrics,.today-grid,.week-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media (max-width:640px){.timetable-metrics,.today-grid,.week-grid{grid-template-columns:1fr}}
+</style>
+<div class="timetable-shell">
+    <div class="layui-card timetable-card">
+        <div class="layui-card-header">
+            <h3 class="timetable-title">课程表</h3>
+            <div class="timetable-subtitle">自动读取班级管理中的上课时间并生成老师课程表，同时自动检测同一老师的时间冲突。</div>
+        </div>
+        <div class="layui-card-body">
+            <div class="layui-form layui-form-pane" lay-filter="timetable-search">
+                <div class="timetable-search-row">
+                    <div class="layui-form-item">
+                        <label class="layui-form-label">教师账号</label>
+                        <div class="layui-input-inline" style="width:260px;">
+                            <input type="text" name="username" value="{$currentUsername|default=''}" class="layui-input" placeholder="请输入教师账号" {if !$canSwitchTeacher}readonly{/if}>
+                        </div>
+                    </div>
+                    <div class="layui-form-item">
+                        <button class="layui-btn" lay-submit lay-filter="search"><i class="layui-icon layui-icon-search"></i> 查看课程表</button>
+                        <button class="layui-btn layui-btn-primary" lay-submit lay-filter="reset"><i class="layui-icon layui-icon-refresh"></i> 重置</button>
+                        <button type="button" class="layui-btn layui-btn-normal" id="exportExcelBtn"><i class="layui-icon layui-icon-export"></i> 导出Excel</button>
+                        <button type="button" class="layui-btn layui-btn-warm" id="printBtn"><i class="layui-icon layui-icon-print"></i> 打印</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="layui-card timetable-card">
+        <div class="layui-card-body" id="timetableApp">
+            <div class="empty-shell">正在加载当前教师课程表...</div>
+        </div>
+    </div>
+</div>
+<script>
+layui.use(['form','layer'],function(){
+    var form=layui.form,layer=layui.layer,$=layui.$;
+    var defaultUsername='{$currentUsername|default=""}',canSwitchTeacher={if $canSwitchTeacher}true{else}false{/if},currentUsername=defaultUsername;
+    function escapeHtml(v){return String(v||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+    function getActiveUsername(){var username=$.trim($('input[name="username"]').val()||currentUsername||defaultUsername);return canSwitchTeacher?username:defaultUsername;}
+    function renderConflictBoard(conflicts){if(!conflicts||!conflicts.length){return '<div class="conflict-board is-empty"><div class="conflict-title">冲突检测</div><div style="color:#15803d;font-size:14px;">当前老师课程表没有发现时间冲突。</div></div>';}var html='<div class="conflict-board"><div class="conflict-title">冲突检测</div>';$.each(conflicts,function(_,item){html+='<div class="conflict-item"><div><div style="font-size:15px;font-weight:700;color:#111827;">'+escapeHtml(item.class_name)+'</div><div style="margin-top:6px;color:#6b7280;font-size:13px;">'+escapeHtml(item.weekday_name)+' '+escapeHtml(item.time_range)+' · '+escapeHtml(item.course_name)+' · '+escapeHtml(item.classroom)+'</div></div><span class="conflict-tag">时间冲突</span></div>';});return html+'</div>';}
+    function renderMetrics(summary){summary=summary||{};return '<div class="timetable-metrics"><div class="metric-box"><div class="metric-label">本周排课班级数</div><div class="metric-value">'+escapeHtml(summary.total_classes||0)+'</div></div><div class="metric-box metric-conflict"><div class="metric-label">冲突班级数</div><div class="metric-value">'+escapeHtml(summary.conflict_classes||0)+'</div></div><div class="metric-box metric-safe"><div class="metric-label">正常班级数</div><div class="metric-value">'+escapeHtml(summary.normal_classes||0)+'</div></div></div>';}
+    function renderTodaySummary(today){today=today||{};var first=today.first_start_time||'暂无';var last=today.last_end_time||'暂无';return '<div><div style="font-size:18px;font-weight:700;color:#111827;margin-bottom:12px;">今日课程提醒 · '+escapeHtml(today.weekday_name||'今天')+'</div><div class="today-grid"><div class="today-box today-course"><div class="today-label">今天共几节课</div><div class="today-value">'+escapeHtml(today.total_classes||0)+'</div></div><div class="today-box today-first"><div class="today-label">第一节几点开始</div><div class="today-value">'+escapeHtml(first)+'</div></div><div class="today-box today-last"><div class="today-label">最后一节几点结束</div><div class="today-value">'+escapeHtml(last)+'</div></div></div></div>';}
+    function renderTeacherMeta(teacher){teacher=teacher||{};var realname=teacher.realname?'（'+escapeHtml(teacher.realname)+'）':'';return '<div><div style="font-size:22px;font-weight:800;color:#111827;">'+escapeHtml(teacher.username||'')+realname+'</div><div class="teacher-meta"><div class="teacher-pill">教师ID <strong>'+escapeHtml(teacher.id||'')+'</strong></div><div class="teacher-pill">邮箱 <strong>'+escapeHtml(teacher.email||'未填写')+'</strong></div><div class="teacher-pill">电话 <strong>'+escapeHtml(teacher.mobile||'未填写')+'</strong></div></div></div>';}
+    function renderDayItem(item){var html='<div class="lesson-card'+(item.has_conflict?' is-conflict':'')+'"><div class="lesson-time">'+escapeHtml(item.time_range)+'</div><div class="lesson-name">'+escapeHtml(item.class_name)+'</div><div class="lesson-course">'+escapeHtml(item.course_name||'未绑定课程')+'</div><div class="lesson-meta"><div>教室：'+escapeHtml(item.classroom||'未填写')+'</div><div>人数：'+escapeHtml(item.current_students||0)+'/'+escapeHtml(item.max_students||0)+'</div><div>班级编号：'+escapeHtml(item.class_no||'')+'</div></div>';if(item.has_conflict){html+='<div class="lesson-alert">时间冲突</div>';}return html+'</div>';}
+    function renderWeek(days){if(!days||!days.length){return '<div class="empty-shell">当前没有可展示的课程安排。</div>';}var html='<div class="week-grid">';$.each(days,function(_,day){html+='<div class="day-column"><div class="day-header"><div class="day-title">'+escapeHtml(day.weekday_name)+'</div><div class="day-count">共 '+escapeHtml((day.items||[]).length)+' 节课程</div></div><div class="day-body">';if(day.items&&day.items.length){$.each(day.items,function(_,item){html+=renderDayItem(item);});}else{html+='<div class="day-empty">今天没有排课</div>';}html+='</div></div>';});return html+'</div>';}
+    function renderSchedule(data){if(!data||!data.teacher){$('#timetableApp').html('<div class="empty-shell">暂无课程表数据</div>');return;}$('#timetableApp').html('<div style="display:grid;gap:16px;">'+renderTeacherMeta(data.teacher)+renderTodaySummary(data.today_summary)+renderMetrics(data.summary)+renderConflictBoard(data.conflicts)+renderWeek(data.days)+'</div>');currentUsername=data.teacher.username||defaultUsername;}
+    function loadSchedule(username,showLoading){var params={username:username||defaultUsername};if(!canSwitchTeacher){params.username=defaultUsername;}if(showLoading){$('#timetableApp').html('<div class="empty-shell">正在加载课程表...</div>');}$.get('/backend/edu/timetable/index',params,function(res){if(!res||res.code!==1){$('#timetableApp').html('<div class="empty-shell">'+escapeHtml((res&&res.msg)||'加载失败')+'</div>');if(res&&res.msg){layer.msg(res.msg,{icon:2});}return;}renderSchedule(res.data||{});},'json').fail(function(){$('#timetableApp').html('<div class="empty-shell">加载失败，请稍后重试</div>');layer.msg('加载失败，请稍后重试',{icon:2});});}
+    function bindActionButtons(){$('#exportExcelBtn').off('click').on('click',function(){var username=getActiveUsername();if(!username){layer.msg('教师账号不能为空',{icon:2});return;}window.open('/backend/edu/timetable/export?username='+encodeURIComponent(username),'_blank');});$('#printBtn').off('click').on('click',function(){var username=getActiveUsername();if(!username){layer.msg('教师账号不能为空',{icon:2});return;}window.open('/backend/edu/timetable/print?username='+encodeURIComponent(username),'_blank');});}
+    form.on('submit(search)',function(data){var username=$.trim((data.field&&data.field.username)||defaultUsername);if(!username){layer.msg('教师账号不能为空',{icon:2});return false;}loadSchedule(username,true);return false;});
+    form.on('submit(reset)',function(){form.val('timetable-search',{username:defaultUsername});currentUsername=defaultUsername;loadSchedule(defaultUsername,true);return false;});
+    bindActionButtons();
+    loadSchedule(defaultUsername,true);
+});
+</script>

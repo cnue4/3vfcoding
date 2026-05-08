@@ -1,0 +1,82 @@
+{layout name="layout/main" /}
+<style>
+:root{--bg:#f3f6fb;--panel:#fff;--line:#e6ecf3;--text:#182230;--muted:#6b7280;--shadow:0 10px 24px rgba(15,23,42,.06)}
+body{background:var(--bg)}
+.console-shell{padding:8px;color:var(--text)}
+.hero,.panel{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}
+.hero{padding:28px 30px;margin-bottom:18px;background:linear-gradient(135deg,#fff,#f8fbff)}
+.hero-top,.panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap}.panel-head{align-items:center;margin-bottom:16px}
+.kicker,.tag{display:inline-flex;align-items:center;padding:6px 12px;border-radius:999px;font-size:12px}.kicker{background:#edf4ff;color:#2563eb;font-weight:700}.tag{background:#f8fafc;color:#64748b;border:1px solid var(--line)}
+.title{margin:14px 0 8px;font-size:28px;font-weight:700;color:#0f172a}.sub{margin:0;max-width:760px;color:var(--muted);font-size:14px;line-height:1.9}
+.badges{display:flex;gap:10px;flex-wrap:wrap}.badge{min-width:118px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:#fff}.badge span{display:block}.badge span:first-child{font-size:12px;color:var(--muted);margin-bottom:6px}.badge span:last-child{font-size:16px;font-weight:700;color:#111827}
+.panel{padding:20px;margin-bottom:18px}.panel h3{margin:0;font-size:18px;font-weight:700}.panel p{margin:4px 0 0;color:var(--muted);font-size:13px}
+.quick-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.info-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:18px}
+.quick-card{position:relative;display:block;min-height:126px;padding:18px;border-radius:16px;color:#fff;text-decoration:none;overflow:hidden;box-shadow:0 12px 26px rgba(15,23,42,.14);cursor:default}.quick-card,.quick-card .quick-title,.quick-card .quick-desc,.quick-card .quick-icon{color:#fff}
+.quick-card:before{content:"";position:absolute;right:-18px;bottom:-18px;width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,.14)}
+.quick-icon{display:inline-flex;width:42px;height:42px;align-items:center;justify-content:center;border-radius:12px;background:rgba(255,255,255,.15);font-size:22px;margin-bottom:16px}.quick-title{margin:0 0 6px;font-size:18px;font-weight:700}.quick-desc{margin:0;font-size:12px;line-height:1.7;color:rgba(255,255,255,.84)}
+.tone-blue{background:linear-gradient(135deg,#4f7cff,#3667f5)}.tone-green{background:linear-gradient(135deg,#1ac48b,#0ea871)}.tone-orange{background:linear-gradient(135deg,#ffbf3c,#f59e0b)}.tone-red{background:linear-gradient(135deg,#ff6b57,#ef4444)}.tone-violet{background:linear-gradient(135deg,#9f67ff,#7c3aed)}.tone-cyan{background:linear-gradient(135deg,#14c9de,#0891b2)}.tone-slate{background:linear-gradient(135deg,#64748b,#475569)}.tone-dark{background:linear-gradient(135deg,#1f2937,#111827)}
+.guide{list-style:none;margin:0;padding:0}.guide li{display:flex;gap:12px;padding:12px 0;border-bottom:1px dashed #e5e7eb;font-size:14px;line-height:1.8;color:#334155}.guide li:last-child{border-bottom:none;padding-bottom:0}.step{flex:0 0 24px;width:24px;height:24px;line-height:24px;text-align:center;border-radius:50%;background:#eff6ff;color:#2563eb;font-size:12px;font-weight:700;margin-top:2px}
+.sys{width:100%;border-collapse:collapse}.sys tr+tr td{border-top:1px solid #eef2f7}.sys td{padding:12px 0;font-size:14px}.sys td:first-child{width:92px;color:var(--muted)}.sys td:last-child{color:#0f172a;font-weight:600}
+@media(max-width:1200px){.quick-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:900px){.quick-grid,.info-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:640px){.hero{padding:22px 18px}.title{font-size:22px}.quick-grid,.info-grid{grid-template-columns:1fr}}
+</style>
+<div class="console-shell">
+    <div class="hero">
+        <div class="hero-top">
+            <div>
+                <span class="kicker">CR EDU CONSOLE</span>
+                <h1 class="title">少儿编程教务工作台</h1>
+                <p class="sub">让孩子在兴趣中爱上编程，在实践中建立逻辑，在成长中看见未来。</p>
+            </div>
+            <div class="badges">
+                <div class="badge"><span>系统版本</span><span>v{:config('funadmin.version')}</span></div>
+                <div class="badge"><span>技术架构</span><span>ThinkPHP8</span></div>
+                <div class="badge"><span>部署方式</span><span>宝塔 + 二级域名</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div class="panel-head">
+            <div>
+                <h3>系统特色</h3>
+                <p>助力少儿编程行业发展。</p>
+            </div>
+            <span class="tag">品牌亮点展示</span>
+        </div>
+        <div class="quick-grid">
+            <div class="quick-card tone-blue"><i class="layui-icon layui-icon-user quick-icon"></i><p class="quick-title">学生管理</p><p class="quick-desc">支持学员档案沉淀、成长记录管理与信息维护。</p></div>
+            <div class="quick-card tone-green"><i class="layui-icon layui-icon-username quick-icon"></i><p class="quick-title">班级管理</p><p class="quick-desc">覆盖排班、班级分配、教师安排与教学组织。</p></div>
+            <div class="quick-card tone-orange"><i class="layui-icon layui-icon-read quick-icon"></i><p class="quick-title">课程管理</p><p class="quick-desc">统一课程体系、课时结构与收费标准设置。</p></div>
+            <div class="quick-card tone-red"><i class="layui-icon layui-icon-time quick-icon"></i><p class="quick-title">课时管理</p><p class="quick-desc">实现课时记录、签到消耗与上课数据留痕。</p></div>
+            <div class="quick-card tone-violet"><i class="layui-icon layui-icon-release quick-icon"></i><p class="quick-title">调课停课</p><p class="quick-desc">灵活处理调课、补课、停课等复杂教学场景。</p></div>
+            <div class="quick-card tone-cyan"><i class="layui-icon layui-icon-notice quick-icon"></i><p class="quick-title">费用预警</p><p class="quick-desc">及时发现欠费与到期风险，提升续费跟进效率。</p></div>
+            <div class="quick-card tone-slate"><i class="layui-icon layui-icon-file quick-icon"></i><p class="quick-title">教案资料库</p><p class="quick-desc">沉淀优质教案与教学素材，提升校区复用能力。</p></div>
+            <div class="quick-card tone-dark"><i class="layui-icon layui-icon-rmb quick-icon"></i><p class="quick-title">课时结算</p><p class="quick-desc">支撑教师课时费统计、核算与结算流程管理。</p></div>
+        </div>
+    </div>
+
+    <div class="info-grid">
+        <div class="panel">
+            <div class="panel-head"><div><h3>推荐操作流程</h3><p>按教务实际顺序快速开始日常工作。</p></div></div>
+            <ul class="guide">
+                <li><span class="step">1</span><span>先建立 <strong>课程管理</strong>，补齐课程编号、分类与课时配置。</span></li>
+                <li><span class="step">2</span><span>再到 <strong>班级管理</strong> 绑定课程、教师、教室与上课时间。</span></li>
+                <li><span class="step">3</span><span>通过 <strong>学生管理</strong> 建档，后续再处理异动、银行与预警。</span></li>
+                <li><span class="step">4</span><span>日常上课进入 <strong>课时管理</strong> 记录上课、签到与课时消耗。</span></li>
+                <li><span class="step">5</span><span>如有变化，使用 <strong>调课停课</strong> 统一登记教学调整。</span></li>
+                <li><span class="step">6</span><span>月底在 <strong>课时结算</strong> 中完成教师课时费核算与结算。</span></li>
+            </ul>
+        </div>
+        <div class="panel">
+            <div class="panel-head"><div><h3>系统信息</h3><p>当前后台运行环境与版本信息。</p></div></div>
+            <table class="sys"><tbody>
+                <tr><td>系统名称</td><td>{:syscfg('site','site_name')}</td></tr>
+                <tr><td>系统版本</td><td>v{:config('funadmin.version')}</td></tr>
+                <tr><td>技术架构</td><td>ThinkPHP8 + Layui</td></tr>
+                <tr><td>开发环境</td><td>PHP <?php echo isset($main_config['php_version']) ? htmlentities((string)$main_config['php_version']) : '未知'; ?> / MySQL <?php echo isset($main_config['mysql_version']) ? htmlentities((string)$main_config['mysql_version']) : '未知'; ?></td></tr>
+                <tr><td>部署方式</td><td>宝塔面板 + 二级域名</td></tr>
+                <tr><td>联系方式</td><td>17623386631</td></tr>
+            </tbody></table>
+        </div>
+    </div>
+</div>

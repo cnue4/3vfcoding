@@ -1,0 +1,125 @@
+{layout name="layout/main" /}
+<div class="layui-card">
+    <div class="layui-card-header">
+        <h3 class="layui-card-title">{if isset($formData['id'])}编辑课程{else}添加课程{/if}</h3>
+    </div>
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane" id="form" action="{if isset($formData['id']) && $formData['id']}/backend/edu/edu_course/edit?id={$formData['id']|default=''}{else}/backend/edu/edu_course/add{/if}" method="post">
+            <input type="hidden" name="__token__" value="{:token()}" />
+            <input type="hidden" name="id" value="{$formData['id']|default=''}">
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">课程名称 <span class="layui-form-must">*</span></label>
+                <div class="layui-input-block">
+                    <input type="text" name="name" value="{$formData['name']|default=''}" class="layui-input"
+                           placeholder="请输入课程名称" required lay-verify="required">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">课程分类 <span class="layui-form-must">*</span></label>
+                <div class="layui-input-block">
+                    <select name="category_id" lay-verify="required">
+                        <option value="">请选择课程分类</option>
+                        {volist name="categoryList" id="category"}
+                        <option value="{$category.id}" {if isset($formData['category_id']) && (string)$formData['category_id']==(string)$category['id']}selected{/if}>{$category.name}</option>
+                        {/volist}
+                    </select>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">总课时 <span class="layui-form-must">*</span></label>
+                <div class="layui-input-block">
+                    <input type="number" name="total_hours" value="{$formData['total_hours']|default=''}"
+                           class="layui-input" placeholder="请输入总课时" min="0" step="0.01"
+                           required lay-verify="required">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">课时单价 <span class="layui-form-must">*</span></label>
+                <div class="layui-input-block">
+                    <input type="number" name="unit_price" value="{$formData['unit_price']|default=''}"
+                           class="layui-input" placeholder="请输入课时单价" min="0" step="0.01"
+                           required lay-verify="required">
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">课程类型</label>
+                <div class="layui-input-block">
+                    <select name="course_type">
+                        <option value="">不填</option>
+                        {volist name="typeList" id="t" key="tk"}
+                        <option value="{$tk}" {if isset($formData['course_type']) && (int)$formData['course_type']==(int)$tk}selected{/if}>{$t}</option>
+                        {/volist}
+                    </select>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">难度等级</label>
+                <div class="layui-input-block">
+                    <select name="difficulty">
+                        <option value="">不填</option>
+                        {volist name="difficultyList" id="dl" key="dk"}
+                        <option value="{$dk}" {if isset($formData['difficulty']) && (int)$formData['difficulty']==(int)$dk}selected{/if}>{$dl}</option>
+                        {/volist}
+                    </select>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">状态</label>
+                <div class="layui-input-block">
+                    <input type="radio" name="status" value="1" title="正常"
+                           {if !isset($formData['status']) || (int)$formData['status']==1}checked{/if}>
+                    <input type="radio" name="status" value="0" title="停用"
+                           {if isset($formData['status']) && (int)$formData['status']==0}checked{/if}>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button type="submit" class="layui-btn layui-btn-normal" lay-submit lay-filter="submit">
+                        <i class="layui-icon layui-icon-save"></i> 保存
+                    </button>
+                    <button type="button" class="layui-btn layui-btn-primary" onclick="parent.layer.closeAll()">
+                        <i class="layui-icon layui-icon-close"></i> 取消
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    layui.use(['form', 'layer'], function() {
+        var form = layui.form;
+        var layer = layui.layer;
+        form.render();
+
+        form.on('submit(submit)', function(data) {
+            var postUrl = $('#form').attr('action');
+            $.post(postUrl, data.field, function(res) {
+                if (res.data && res.data.__token__) {
+                    $('input[name="__token__"]').val(res.data.__token__);
+                }
+                if (res.code === 1) {
+                    layer.msg(res.msg, {icon: 1}, function() {
+                        if (window.parent && window.parent.layui && window.parent.layui.table) {
+                            window.parent.layui.table.reload('table', {
+                                where: {_t: new Date().getTime()}
+                            });
+                        }
+                        parent.layer.closeAll();
+                    });
+                } else {
+                    layer.msg(res.msg, {icon: 2});
+                }
+            }, 'json');
+            return false;
+        });
+    });
+</script>

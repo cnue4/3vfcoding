@@ -1,0 +1,83 @@
+{
+  "name": "funadmin/funadmin",
+  "description": "FunAdmin是一个基于thinkphp8,Layui,requirejs的应用框架",
+  "type": "project",
+  "license": "Apache-2.0",
+  "keywords": [
+    "FunAdmin","CMS","CMF","LowCode","Layui","TP8",
+    "easywechat", "framework","TP6","ORM","低代码",
+    "thinkphp", "thinkphp6","thinkphp8"
+  ],
+  "homepage": "https://www.funadmin.com",
+  "authors": [
+    {
+      "name": "funadmin",
+      "email": "994927909@qq.com"
+    }
+  ],
+  "support": {
+    "email": "994927909@qq.com",
+    "issues": "https://gitee.com/funadmin/funadmin/issues",
+    "forum": "https://bbs.funadmin.com/",
+    "wiki": "https://doc.funadmin.com",
+    "source": "https://gitee.com/funadmin/funadmin"
+  },
+  "require": {
+    "php": ">=8.1.0",
+    "ext-json": "*",
+    "topthink/framework": "^8.1.2",
+    "topthink/think-orm": "^3.0|^4.0",
+    "topthink/think-view": "^2.0",
+    "topthink/think-image": "^1.0",
+    "topthink/think-captcha": "^3.0.11",
+    "topthink/think-helper": "^3.1",
+    "topthink/think-multi-app": "^1.1",
+    "topthink/think-filesystem": "^2.0",
+    "topthink/think-queue": "^3.0",
+    "topthink/think-throttle": "^2.0",
+    "doctrine/annotations": "^2.0.1",
+    "ramsey/uuid": "^4.7",
+    "phpoffice/phpspreadsheet": "^3.4",
+    "guzzlehttp/guzzle": "^7.9",
+    "firebase/php-jwt": "*",
+    "overtrue/pinyin": "^5.3"
+  },
+  "require-dev": {
+        "symfony/var-dumper": ">=6.4",
+        "topthink/think-trace": "^1.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "app\\": "app"
+    },
+    "psr-0": {
+      "": "extend/"
+    },
+    "files": [
+      "extend/fun/helper.php"
+    ]
+  },
+  "extra": {
+    "think": {
+      "services": [
+      ]
+    }
+  },
+  "config": {
+    "preferred-install": "dist"
+,
+    "allow-plugins": {
+            "easywechat-composer/easywechat-composer": true
+        }
+  },
+  "scripts": {
+    "post-autoload-dump": [
+      "@php think service:discover",
+      "@php think vendor:publish",
+      "@php think curd:config",
+      "@php think addons:config",
+      "@php think builder:config",
+      "@php think auth:config"
+    ]
+  }
+}

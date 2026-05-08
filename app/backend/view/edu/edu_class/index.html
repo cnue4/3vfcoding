@@ -1,0 +1,294 @@
+{layout name="layout/main" /}
+<style>
+    #table + .layui-table-view .layui-table-tool-temp {
+        display: flex;
+        align-items: flex-end;
+        gap: 8px;
+        flex-wrap: wrap;
+        padding-right: 0;
+    }
+
+    #table + .layui-table-view .layui-table-tool-self {
+        position: static;
+        float: none;
+        margin: 0;
+        display: inline-flex;
+        align-items: flex-end;
+        align-self: flex-end;
+    }
+
+    #table + .layui-table-view .layui-table-tool-self .layui-inline {
+        margin: 0;
+    }
+
+    #table + .layui-table-view .layui-table-tool-self .layui-btn-container {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+    }
+
+    #table + .layui-table-view .layui-table-tool-self .layui-btn-container > * + * {
+        margin-left: 8px;
+    }
+
+    #table + .layui-table-view .layui-table-tool-self .layui-inline + .layui-inline,
+    #table + .layui-table-view .layui-table-tool-self .layui-btn + .layui-btn {
+        margin-left: 8px;
+    }
+
+    #table + .layui-table-view .layui-table-tool-self .layui-btn {
+        height: 30px;
+        line-height: 30px;
+        padding: 0 10px;
+        margin: 0;
+    }
+
+    #table + .layui-table-view .layui-table-tool-self .layui-btn .layui-icon {
+        margin-right: 4px;
+    }
+
+    .table-batch-delete-disabled {
+        opacity: .45;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    .table-action-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: nowrap;
+    }
+
+    .table-action-group .layui-btn {
+        margin: 0;
+    }
+</style>
+<div class="layui-card">
+    <div class="layui-card-header">
+        <h3 class="layui-card-title">班级管理</h3>
+    </div>
+    <div class="layui-card-body">
+        <div class="layui-form layui-form-pane" lay-filter="search">
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">搜索</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="keyword" placeholder="请输入班级名称、编号、教室、课程或教师" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <button class="layui-btn layui-btn-primary" lay-submit lay-filter="search">
+                        <i class="layui-icon layui-icon-search"></i> 搜索
+                    </button>
+                    <button class="layui-btn layui-btn-primary" lay-submit lay-filter="reset">
+                        <i class="layui-icon layui-icon-refresh"></i> 重置
+                    </button>
+                </div>
+            </div>
+        </div>
+        <table class="layui-hide" id="table" lay-filter="table"></table>
+    </div>
+</div>
+<script type="text/html" id="toolbar">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm" lay-event="add">
+            <i class="layui-icon layui-icon-add-circle"></i> 添加班级
+        </button>
+        <button class="layui-btn layui-btn-sm layui-btn-danger table-batch-delete-disabled" lay-event="batchDelete" id="eduClassBatchDeleteBtn">
+            <i class="layui-icon layui-icon-delete"></i> 批量删除
+        </button>
+    </div>
+</script>
+<script type="text/html" id="status">
+    {{# if(d.status == 1){ }}
+    <span class="layui-badge layui-bg-green">正常</span>
+    {{# } else { }}
+    <span class="layui-badge layui-bg-gray">结课</span>
+    {{# } }}
+</script>
+<script type="text/html" id="remainingHoursTpl">
+    {{# if(parseFloat(d.remaining_hours) <= 3){ }}
+    <span style="color:#ff4d4f;font-weight:700;">{{ d.remaining_hours }}</span>
+    {{# } else { }}
+    <span>{{ d.remaining_hours }}</span>
+    {{# } }}
+</script>
+<script type="text/html" id="action">
+    <button class="layui-btn layui-btn-xs" lay-event="view">查看</button>
+    <button class="layui-btn layui-btn-xs layui-btn-normal" lay-event="edit">编辑</button>
+    <button class="layui-btn layui-btn-xs layui-btn-danger" lay-event="delete">删除</button>
+</script>
+<script>
+    layui.use(['table', 'form', 'layer'], function() {
+        var table = layui.table;
+        var form = layui.form;
+        var layer = layui.layer;
+        var tableId = 'EduClassTable';
+        var currentLayerIndex = null;
+
+        function relocateDefaultToolbar() {
+            var $tableView = $('#table').next('.layui-table-view');
+            var $toolbar = $tableView.find('.layui-table-tool-self');
+            var $anchor = $('#eduClassBatchDeleteBtn');
+            if (!$tableView.length || !$toolbar.length || !$anchor.length) {
+                return;
+            }
+            $toolbar.insertAfter($anchor);
+        }
+
+        function reloadTable(resetPage) {
+            var options = {};
+            if (resetPage) {
+                options.page = {curr: 1};
+            }
+            table.reload(tableId, options);
+        }
+
+        function openForm(title, url) {
+            currentLayerIndex = layer.open({
+                type: 2,
+                title: title,
+                content: url,
+                area: ['860px', '720px'],
+                end: function() {
+                    reloadTable(false);
+                }
+            });
+        }
+
+        function openView(title, url) {
+            currentLayerIndex = layer.open({
+                type: 2,
+                title: title,
+                content: url,
+                area: ['1100px', '760px'],
+                maxmin: true,
+                shadeClose: false
+            });
+        }
+
+        function updateBatchDeleteButtonState() {
+            var selected = table.checkStatus(tableId).data || [];
+            $('#eduClassBatchDeleteBtn').toggleClass('table-batch-delete-disabled', !selected.length);
+        }
+
+        function deleteItems(ids, done, options) {
+            options = options || {};
+            $.post('/backend/edu/edu_class/delete', {ids: ids.join(',')}, function(res) {
+                if (res.code === 1) {
+                    layer.msg(options.successText || res.msg || '删除成功', {icon: 1}, function() {
+                        reloadTable(false);
+                        updateBatchDeleteButtonState();
+                        if (typeof done === 'function') done(true);
+                    });
+                } else {
+                    layer.msg((res && res.msg) || '删除失败', {icon: 2});
+                    if (typeof done === 'function') done(false);
+                }
+            }, 'json').fail(function() {
+                layer.msg('删除失败，请稍后重试', {icon: 2});
+                if (typeof done === 'function') done(false);
+            });
+        }
+
+        table.render({
+            elem: '#table',
+            id: tableId,
+            url: '/backend/edu/edu_class/index',
+            toolbar: '#toolbar',
+            defaultToolbar: ['filter', 'exports', 'print'],
+            cols: [[
+                {type: 'checkbox'},
+                {field: 'id', title: 'ID', width: 80},
+                {field: 'class_no', title: '班级编号', width: 130},
+                {field: 'name', title: '班级名称', minWidth: 180},
+                {field: 'course_name', title: '课程', minWidth: 160},
+                {field: 'teacher_name', title: '教师', minWidth: 120},
+                {field: 'classroom', title: '教室', minWidth: 140},
+                {field: 'max_students', title: '最大人数', width: 110},
+                {field: 'current_students', title: '当前人数', width: 110},
+                {field: 'total_hours', title: '总课时', width: 90},
+                {field: 'used_hours', title: '已用', width: 80},
+                {field: 'remaining_hours', title: '剩余', width: 80, templet: '#remainingHoursTpl'},
+                {field: 'class_time', title: '上课时间', minWidth: 180},
+                {field: 'status', title: '状态', width: 90, templet: '#status'},
+                {toolbar: '#action', title: '操作', width: 180, fixed: 'right'}
+            ]],
+            page: true,
+            limit: 10,
+            limits: [10, 20, 30, 50],
+            text: { none: '暂无数据' },
+            done: function() {
+                updateBatchDeleteButtonState();
+                relocateDefaultToolbar();
+            }
+        });
+
+        table.on('toolbar(table)', function(obj) {
+            if (obj.event === 'add') {
+                openForm('添加班级', '/backend/edu/edu_class/add');
+            } else if (obj.event === 'batchDelete') {
+                var selected = table.checkStatus(tableId).data || [];
+                if (!selected.length) {
+                    updateBatchDeleteButtonState();
+                    return;
+                }
+                var ids = selected.map(function(item) { return item.id; });
+                layer.confirm('确定要批量删除选中的 ' + ids.length + ' 个班级吗？', function(index) {
+                    deleteItems(ids, function() {
+                        layer.close(index);
+                    }, {successText: '已删除 ' + ids.length + ' 条数据'});
+                });
+            }
+        });
+
+        table.on('checkbox(table)', function() {
+            updateBatchDeleteButtonState();
+        });
+
+        table.on('tool(table)', function(obj) {
+            var event = obj.event;
+            var data = obj.data;
+            if (event === 'view') {
+                openView('查看班级', '/backend/edu/edu_class/view?id=' + data.id);
+            } else if (event === 'edit') {
+                openForm('编辑班级', '/backend/edu/edu_class/edit?id=' + data.id);
+            } else if (event === 'delete') {
+                layer.confirm('确定要删除这个班级吗？', function(index) {
+                    deleteItems([data.id], function() {
+                        layer.close(index);
+                    });
+                });
+            }
+        });
+
+        form.on('submit(search)', function(data) {
+            table.reload(tableId, { where: data.field, page: {curr: 1} });
+            return false;
+        });
+
+        form.on('submit(reset)', function() {
+            form.val('search', {
+                keyword: ''
+            });
+            table.reload(tableId, { where: {}, page: {curr: 1} });
+            return false;
+        });
+
+        window.addEventListener('focus', function() {
+            reloadTable(false);
+        });
+
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                reloadTable(false);
+            }
+        });
+
+        window.__refreshEduClassTable = function(resetPage) {
+            reloadTable(!!resetPage);
+        };
+    });
+</script>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>日志</title>
+</head>
+<body>
+<table  class="layui-table">
+    <thead>
+    <tr class="layui-bg-blue" >
+        <td width="50px">序号</td>
+        <td width="260px">说明</td>
+        <td width="70px">状态</td>
+        <td width="160px">执行时间</td>
+    </tr>
+    </thead>
+    <tbody>
+    {foreach $data as $k=>$v}
+        <tr>
+            <td>{$k+1}</td>
+            <td>{$v['notes']}</td>
+            <td>{$v['status']?'<span class="layui-badge layui-bg-green">成功</span>':'<span class="layui-badge layui-bg-orange">失败</span>'}</td>
+            <td>{$v['create_time']}</td>
+        </tr>
+    {/foreach}
+    {if(!$data) }
+    <tr>
+        <td colspan="4">没有执行记录</td>
+    </tr>
+    {/if}
+    </tbody>
+</table>
+
+</body>
+</html>

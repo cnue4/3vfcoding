@@ -1,0 +1,33 @@
+{layout name="layout/main" /}
+<style>
+    html, body {height:100%;overflow:auto;background:#f5f7fb;}
+    .schedule-view-card {min-height:100%;}
+    .schedule-view-card .layui-card-body {max-height:calc(100vh - 90px);overflow-y:auto;box-sizing:border-box;}
+    @media (max-width:640px) {
+        .schedule-view-card .layui-form-label {width:auto;float:none;display:block;margin-bottom:8px;}
+        .schedule-view-card .layui-input-block {margin-left:0;}
+    }
+</style>
+<div class="layui-card schedule-view-card">
+    <div class="layui-card-header"><h3 class="layui-card-title">查看调整单</h3></div>
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane">
+            <div class="layui-form-item"><label class="layui-form-label">调整单号</label><div class="layui-input-block"><input type="text" value="{$formData.adjust_no|default=''}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">类型</label><div class="layui-input-block"><input type="text" value="{$formData.adjust_type_text|default=''}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">业务状态</label><div class="layui-input-block"><input type="text" value="{$formData.business_status_text|default=''}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">班级</label><div class="layui-input-block"><input type="text" value="{$formData.class_name|default=''}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">学生</label><div class="layui-input-block"><input type="text" value="{$formData.student_name|default='整班调整'}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">原教师</label><div class="layui-input-block"><input type="text" value="{$formData.teacher_name|default=''}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">代课教师</label><div class="layui-input-block"><input type="text" value="{$formData.replace_teacher_name|default='无'}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">课时归属</label><div class="layui-input-block"><div style="padding-top:8px;color:#2563eb;font-weight:700;">{$formData.lesson_owner_text|default='原教师'}</div></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">原日期</label><div class="layui-input-block"><input type="text" value="{$formData.origin_class_date|default=''} {$formData.origin_start_time|default=''} - {$formData.origin_end_time|default=''}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">目标日期</label><div class="layui-input-block"><input type="text" value="{$formData.target_class_date|default=''} {$formData.target_start_time|default=''} - {$formData.target_end_time|default=''}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">目标教室</label><div class="layui-input-block"><input type="text" value="{$formData.target_classroom|default=''}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">扣减课时</label><div class="layui-input-block"><input type="text" value="{$formData.deduct_hours|default='0'}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">补回课时</label><div class="layui-input-block"><input type="text" value="{$formData.compensate_hours|default='0'}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item layui-form-text"><label class="layui-form-label">申请原因</label><div class="layui-input-block"><textarea class="layui-textarea" readonly>{$formData.reason|default=''}</textarea></div></div>
+            <div class="layui-form-item layui-form-text"><label class="layui-form-label">审核备注</label><div class="layui-input-block"><textarea class="layui-textarea" readonly>{$formData.approve_remark|default=''}</textarea></div></div>
+            <div class="layui-form-item"><div class="layui-input-block"><button type="button" class="layui-btn layui-btn-primary" onclick="parent.layer.closeAll()"><i class="layui-icon layui-icon-close"></i> 关闭</button></div></div>
+        </form>
+    </div>
+</div>

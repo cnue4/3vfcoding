@@ -1,0 +1,56 @@
+{layout name="layout/main" /}
+<style>
+    html, body {height:100%;overflow:auto;background:#f5f7fb;}
+    .teacher-settlement-view-card {min-height:100%;}
+    .teacher-settlement-view-card .layui-card-body {max-height:calc(100vh - 90px);overflow-y:auto;box-sizing:border-box;}
+    .settlement-detail-table {width:100%;border-collapse:collapse;margin-top:16px;}
+    .settlement-detail-table th,.settlement-detail-table td {border:1px solid #e5e7eb;padding:10px 12px;text-align:left;font-size:13px;}
+    .settlement-detail-table th {background:#f8fafc;font-weight:700;}
+    @media (max-width:640px) {
+        .teacher-settlement-view-card .layui-form-label {width:auto;float:none;display:block;margin-bottom:8px;}
+        .teacher-settlement-view-card .layui-input-block {margin-left:0;}
+    }
+</style>
+<div class="layui-card teacher-settlement-view-card">
+    <div class="layui-card-header"><h3 class="layui-card-title">查看课时结算</h3></div>
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane">
+            <div class="layui-form-item"><label class="layui-form-label">结算单号</label><div class="layui-input-block"><input type="text" value="{$formData.settlement_no|default=''}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">教师</label><div class="layui-input-block"><input type="text" value="{$formData.teacher_name|default=''}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">结算月份</label><div class="layui-input-block"><input type="text" value="{$formData.settlement_month|default=''}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">课时单价</label><div class="layui-input-block"><input type="text" value="{$formData.hour_price|default='0'}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">应结课时</label><div class="layui-input-block"><input type="text" value="{$formData.should_hours|default='0'}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">调整课时</label><div class="layui-input-block"><input type="text" value="{$formData.adjust_hours|default='0'}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">最终课时</label><div class="layui-input-block"><input type="text" value="{$formData.final_hours|default='0'}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">应结金额</label><div class="layui-input-block"><input type="text" value="{$formData.should_amount|default='0'}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">扣减金额</label><div class="layui-input-block"><input type="text" value="{$formData.deduct_amount|default='0'}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">奖励金额</label><div class="layui-input-block"><input type="text" value="{$formData.reward_amount|default='0'}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">最终金额</label><div class="layui-input-block"><input type="text" value="{$formData.final_amount|default='0'}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">结算状态</label><div class="layui-input-block"><input type="text" value="{$formData.settlement_status_text|default=''}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item layui-form-text"><label class="layui-form-label">备注</label><div class="layui-input-block"><textarea class="layui-textarea" readonly>{$formData.remark|default=''}</textarea></div></div>
+            <div class="layui-form-item layui-form-text">
+                <label class="layui-form-label">结算明细</label>
+                <div class="layui-input-block">
+                    <table class="settlement-detail-table">
+                        <thead><tr><th>班级</th><th>上课日期</th><th>课时</th><th>单价</th><th>金额</th></tr></thead>
+                        <tbody>
+                            {volist name="detailList" id="detail"}
+                            <tr>
+                                <td>{$detail.class_name|default=''}</td>
+                                <td>{$detail.class_date|default=''}</td>
+                                <td>{$detail.actual_hours|default='0'}</td>
+                                <td>{$detail.hour_price|default='0'}</td>
+                                <td>{$detail.line_amount|default='0'}</td>
+                            </tr>
+                            {/volist}
+                            {if empty($detailList)}
+                            <tr><td colspan="5" style="text-align:center;color:#6b7280;">暂无结算明细</td></tr>
+                            {/if}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="layui-form-item"><div class="layui-input-block"><button type="button" class="layui-btn layui-btn-primary" onclick="parent.layer.closeAll()"><i class="layui-icon layui-icon-close"></i> 关闭</button></div></div>
+        </form>
+    </div>
+</div>

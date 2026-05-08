@@ -1,0 +1,105 @@
+{layout name="layout/main" /}
+<style>
+    html, body {height:100%;overflow:auto;background:#f5f7fb;}
+    .student-import-card {min-height:100%;}
+    .student-import-card .layui-card-body {max-height:calc(100vh - 90px);overflow-y:auto;box-sizing:border-box;}
+    .import-tip-panel {padding:14px 16px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;color:#334155;line-height:1.8;}
+    .import-tip-panel strong {color:#0f172a;}
+    .import-tip-danger {color:#dc2626;font-weight:700;}
+</style>
+<div class="layui-card student-import-card">
+    <div class="layui-card-header"><h3 class="layui-card-title">批量导入学生</h3></div>
+    <div class="layui-card-body">
+        <div class="import-tip-panel">
+            <div><strong>导入说明：</strong></div>
+            <div>1. 请先下载模板，按模板列顺序填写学生数据。</div>
+            <div>2. 性别仅支持填写“男 / 女”，学生状态支持“在读 / 休学 / 退学”。</div>
+            <div>3. 班级、课程名称需与系统中的名称完全一致。</div>
+            <div>4. 支持上传 <code>.xlsx</code> / <code>.xls</code> 文件。</div>
+            <div class="import-tip-danger">5. 新建一个模板然后把模板的数据项复制过去填写好后再导入，不要直接用下载的模板文件导入！！！</div>
+        </div>
+
+        <div class="layui-form" style="margin-top:18px;">
+            <div class="layui-form-item">
+                <div class="layui-input-block" style="margin-left:0;display:flex;gap:12px;flex-wrap:wrap;">
+                    <a href="/backend/edu/student/add?download_template=1" class="layui-btn layui-btn-primary"><i class="layui-icon layui-icon-download-circle"></i> 下载导入模板</a>
+                    <button type="button" class="layui-btn layui-btn-normal" id="chooseImportFileBtn"><i class="layui-icon layui-icon-upload-drag"></i> 选择Excel文件</button>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block" style="margin-left:0;">
+                    <input type="text" id="selectedImportFileName" class="layui-input" placeholder="尚未选择文件" readonly>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block" style="margin-left:0;">
+                    <button type="button" class="layui-btn" id="submitImportBtn"><i class="layui-icon layui-icon-release"></i> 开始导入</button>
+                    <button type="button" class="layui-btn layui-btn-primary" onclick="parent.layer.closeAll()"><i class="layui-icon layui-icon-close"></i> 关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+layui.use(['layer','upload','jquery'], function(){
+    var layer = layui.layer, upload = layui.upload, $ = layui.jquery;
+    var selectedFile = null;
+    var selectedFileName = '';
+    var uploading = false;
+
+    function refreshParentAndClose(){
+        if(parent && typeof parent.__refreshStudentTable === 'function'){
+            parent.__refreshStudentTable(true);
+        }
+        if(parent && parent.layer){
+            var frameIndex = parent.layer.getFrameIndex(window.name);
+            parent.layer.close(frameIndex);
+        }
+    }
+
+    upload.render({
+        elem:'#chooseImportFileBtn',
+        url:'/backend/edu/student/add?import_mode=1',
+        auto:false,
+        accept:'file',
+        exts:'xls|xlsx',
+        bindAction:'#submitImportBtn',
+        choose:function(obj){
+            var files = obj.pushFile();
+            var fileKey = Object.keys(files)[0];
+            if(!fileKey){ return; }
+            selectedFile = files[fileKey];
+            selectedFileName = selectedFile.name || '';
+            $('#selectedImportFileName').val(selectedFileName || '尚未选择文件');
+        },
+        before:function(){
+            if(uploading){ return false; }
+            if(!selectedFile){
+                layer.msg('请先选择Excel文件', {icon:2});
+                return false;
+            }
+            uploading = true;
+            $('#submitImportBtn').addClass('layui-btn-disabled').prop('disabled', true);
+            layer.load(1, {shade:0.15});
+        },
+        done:function(res){
+            layer.closeAll('loading');
+            uploading = false;
+            $('#submitImportBtn').removeClass('layui-btn-disabled').prop('disabled', false);
+            if(res && Number(res.code) === 1){
+                layer.msg(res.msg || '导入成功', {icon:1, time:2200}, function(){
+                    refreshParentAndClose();
+                });
+            }else{
+                layer.msg((res && res.msg) || '导入失败', {icon:2, time:3500});
+            }
+        },
+        error:function(){
+            layer.closeAll('loading');
+            uploading = false;
+            $('#submitImportBtn').removeClass('layui-btn-disabled').prop('disabled', false);
+            layer.msg('导入失败，请稍后重试', {icon:2});
+        }
+    });
+});
+</script>

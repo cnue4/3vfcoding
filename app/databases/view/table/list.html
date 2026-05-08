@@ -1,0 +1,60 @@
+
+    <div class="layui-col-xs12 layui-col-sm6 layui-col-md4 layui-col-lg3">
+        <div class="layui-form-item layui-inline">
+            <label class="layui-form-label">表名</label>
+            <div class="layui-input-inline">
+                <input id="name" value="{$formData['TABLE_NAME']}" disabled class="layui-input">
+            </div>
+        </div>
+    </div>
+<div class="layui-col-xs12 layui-col-sm6 layui-col-md4 layui-col-lg3">
+        <div class="layui-form-item layui-inline">
+            <label class="layui-form-label">引擎</label>
+            <div class="layui-input-inline">
+                <input id="classname" value="{$formData['ENGINE']}" disabled class="layui-input">
+            </div>
+        </div>
+    </div>
+<div class="layui-col-xs12 layui-col-sm6 layui-col-md4 layui-col-lg3">
+        <div class="layui-form-item layui-inline">
+            <label class="layui-form-label">总记录数</label>
+            <div class="layui-input-inline">
+                <input id="fun" value="{$formData['TABLE_ROWS']}" disabled readonly class="layui-input">
+            </div>
+        </div>
+    </div>
+<div class="layui-col-xs12 layui-col-sm6 layui-col-md4 layui-col-lg3">
+        <div class="layui-form-item layui-inline">
+            <label class="layui-form-label">注释</label>
+            <div class="layui-input-inline">
+                <input id="canshu" value="{$formData['TABLE_COMMENT']}" disabled class="layui-input">
+            </div>
+        </div>
+    </div>
+<div class="layui-col-xs12 layui-col-sm6 layui-col-md4 layui-col-lg3">
+        <div class="layui-form-item layui-inline">
+            <label class="layui-form-label">字符集</label>
+            <div class="layui-input-inline">
+                <input id="dttype" value="{$formData['TABLE_COLLATION']}" disabled class="layui-input">
+            </div>
+        </div>
+    </div>
+<div class="layui-col-xs12 layui-col-sm6 layui-col-md4 layui-col-lg3">
+        <div class="layui-form-item layui-inline">
+            <label class="layui-form-label">创建时间</label>
+            <div class="layui-input-inline">
+                <input id="create_time" value="{$formData['CREATE_TIME']}" disabled class="layui-input">
+            </div>
+        </div>
+    </div>
+<div class="layui-col-xs12 layui-col-sm6 layui-col-md4 layui-col-lg3">
+        <div class="layui-form-item layui-inline">
+            <label class="layui-form-label">修改时间</label>
+            <div class="layui-input-inline">
+                <input id="update_time" value="{$formData['UPDATE_TIME']}" disabled class="layui-input">
+            </div>
+        </div>
+    </div>
+
+    {:form_closebtn()}
+

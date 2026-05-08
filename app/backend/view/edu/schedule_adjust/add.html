@@ -1,0 +1,206 @@
+{layout name="layout/main" /}
+<style>
+    html, body {height:100%;overflow:auto;background:#f5f7fb;}
+    .schedule-form-card {min-height:100%;}
+    .schedule-form-card .layui-card-body {max-height:calc(100vh - 90px);overflow-y:auto;box-sizing:border-box;}
+    @media (max-width:640px) {
+        .schedule-form-card .layui-form-label {width:auto;float:none;display:block;margin-bottom:8px;}
+        .schedule-form-card .layui-input-block {margin-left:0;}
+    }
+</style>
+<div class="layui-card schedule-form-card">
+    <div class="layui-card-header">
+        <h3 class="layui-card-title">{$title}调整单</h3>
+    </div>
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane" id="form" action="{if isset($formData['id'])}/backend/edu/schedule_adjust/edit?id={$formData['id']}{else}/backend/edu/schedule_adjust/add{/if}" method="post">
+            <input type="hidden" name="id" value="{$formData['id']|default=''}">
+            <div class="layui-form-item">
+                <label class="layui-form-label">调整单号</label>
+                <div class="layui-input-block"><input type="text" value="{if isset($formData['adjust_no'])}{$formData['adjust_no']}{else}保存后自动生成{/if}" class="layui-input" readonly></div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">调整类型</label>
+                <div class="layui-input-block">
+                    <select name="adjust_type" lay-verify="required">
+                        {volist name="adjustTypeList" id="typeName" key="typeValue"}
+                        <option value="{$typeValue}" {if isset($formData['adjust_type']) && (int)$formData['adjust_type']==(int)$typeValue}selected{/if}>{$typeName}</option>
+                        {/volist}
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">业务状态</label>
+                <div class="layui-input-block">
+                    <select name="business_status" lay-verify="required">
+                        {volist name="businessStatusList" id="statusName" key="statusValue"}
+                        <option value="{$statusValue}" {if isset($formData['business_status']) && (int)$formData['business_status']==(int)$statusValue}selected{/if}>{$statusName}</option>
+                        {/volist}
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">班级</label>
+                <div class="layui-input-block">
+                    <select name="class_id" lay-verify="required">
+                        <option value="">请选择班级</option>
+                        {volist name="classList" id="classItem"}
+                        <option value="{$classItem.id}" {if isset($formData['class_id']) && (int)$formData['class_id']==(int)$classItem['id']}selected{/if}>{$classItem.id} - {$classItem.name}</option>
+                        {/volist}
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">学生</label>
+                <div class="layui-input-block">
+                    <input type="radio" name="target_scope" value="1" title="整班调整" lay-filter="target_scope" {if !isset($formData['target_scope']) || (int)$formData['target_scope']===1}checked{/if}>
+                    <input type="radio" name="target_scope" value="2" title="指定学生" lay-filter="target_scope" {if isset($formData['target_scope']) && (int)$formData['target_scope']===2}checked{/if}>
+                </div>
+            </div>
+            <div class="layui-form-item" id="studentKeywordItem">
+                <label class="layui-form-label">学生姓名</label>
+                <div class="layui-input-block">
+                    <input type="text" name="student_keyword" value="{$formData['student_keyword']|default=''}" class="layui-input" placeholder="请输入学生姓名，支持中英文逗号分隔多个学生，如 张三,李四 或 张三，李四">
+                    <div class="layui-form-mid layui-word-aux">选择“指定学生”后填写姓名；支持使用中文或英文逗号分隔多个学生，系统会按当前所选班级精确匹配并记录真实ID。</div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">原教师</label>
+                <div class="layui-input-block">
+                    <select name="teacher_id" lay-verify="required">
+                        <option value="">请选择原教师</option>
+                        {volist name="teacherList" id="teacherItem"}
+                        <option value="{$teacherItem.id}" {if isset($formData['teacher_id']) && (int)$formData['teacher_id']==(int)$teacherItem['id']}selected{/if}>{if !empty($teacherItem['realname'])}{$teacherItem.realname}（{$teacherItem.username}）{else/}{$teacherItem.username}{/if}</option>
+                        {/volist}
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">代课教师</label>
+                <div class="layui-input-block">
+                    <select name="replace_teacher_id">
+                        <option value="0">无</option>
+                        {volist name="teacherList" id="teacherItem"}
+                        <option value="{$teacherItem.id}" {if isset($formData['replace_teacher_id']) && (int)$formData['replace_teacher_id']==(int)$teacherItem['id']}selected{/if}>{if !empty($teacherItem['realname'])}{$teacherItem.realname}（{$teacherItem.username}）{else/}{$teacherItem.username}{/if}</option>
+                        {/volist}
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">原课时记录</label>
+                <div class="layui-input-block">
+                    <select name="origin_class_hour_id">
+                        <option value="0">请选择原课时记录</option>
+                        {volist name="classHourList" id="classHourItem"}
+                        <option value="{$classHourItem.id}" {if isset($formData['origin_class_hour_id']) && (int)$formData['origin_class_hour_id']==(int)$classHourItem['id']}selected{/if}>{$classHourItem.record_no}</option>
+                        {/volist}
+                    </select>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">原上课日期</label>
+                <div class="layui-input-block"><input type="date" name="origin_class_date" value="{$formData['origin_class_date']|default=''}" class="layui-input"></div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">原开始时间</label>
+                <div class="layui-input-block"><input type="time" name="origin_start_time" value="{$formData['origin_start_time']|default=''}" class="layui-input"></div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">原结束时间</label>
+                <div class="layui-input-block"><input type="time" name="origin_end_time" value="{$formData['origin_end_time']|default=''}" class="layui-input"></div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">目标上课日期</label>
+                <div class="layui-input-block"><input type="date" name="target_class_date" value="{$formData['target_class_date']|default=''}" class="layui-input"></div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">目标开始时间</label>
+                <div class="layui-input-block"><input type="time" name="target_start_time" value="{$formData['target_start_time']|default=''}" class="layui-input"></div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">目标结束时间</label>
+                <div class="layui-input-block"><input type="time" name="target_end_time" value="{$formData['target_end_time']|default=''}" class="layui-input"></div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">目标教室</label>
+                <div class="layui-input-block"><input type="text" name="target_classroom" value="{$formData['target_classroom']|default=''}" class="layui-input" placeholder="请输入目标教室"></div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">扣减课时</label>
+                <div class="layui-input-block"><input type="number" name="deduct_hours" value="{$formData['deduct_hours']|default='0'}" class="layui-input" min="0" step="0.01"></div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">补回课时</label>
+                <div class="layui-input-block"><input type="number" name="compensate_hours" value="{$formData['compensate_hours']|default='0'}" class="layui-input" min="0" step="0.01"></div>
+            </div>
+            <div class="layui-form-item layui-form-text">
+                <label class="layui-form-label">申请原因</label>
+                <div class="layui-input-block"><textarea name="reason" class="layui-textarea" placeholder="请输入调整原因">{$formData['reason']|default=''}</textarea></div>
+            </div>
+            <div class="layui-form-item layui-form-text">
+                <label class="layui-form-label">审核备注</label>
+                <div class="layui-input-block"><textarea name="approve_remark" class="layui-textarea" placeholder="请输入审核备注">{$formData['approve_remark']|default=''}</textarea></div>
+            </div>
+            <div class="layui-form-item" style="display:none;">
+                <label class="layui-form-label">状态</label>
+                <div class="layui-input-block">
+                    <input type="radio" name="status" value="1" title="正常" {if !isset($formData['status']) || (int)$formData['status']==1}checked{/if}>
+                    <input type="radio" name="status" value="2" title="禁用" {if isset($formData['status']) && (int)$formData['status']==2}checked{/if}>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button type="submit" class="layui-btn layui-btn-normal" lay-submit lay-filter="submit"><i class="layui-icon layui-icon-save"></i> 保存</button>
+                    <button type="button" class="layui-btn layui-btn-primary" onclick="parent.layer.closeAll()"><i class="layui-icon layui-icon-close"></i> 取消</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+layui.use(['form','layer'], function(){
+    var form = layui.form, layer = layui.layer;
+    var submitting = false;
+    form.render();
+
+    function syncStudentKeywordVisibility(){
+        var scope = Number($('input[name="target_scope"]:checked').val() || 1);
+        if(scope === 2){
+            $('#studentKeywordItem').show();
+        }else{
+            $('#studentKeywordItem').hide();
+            $('input[name="student_keyword"]').val('');
+        }
+    }
+
+    syncStudentKeywordVisibility();
+    form.on('radio(target_scope)', function(){
+        syncStudentKeywordVisibility();
+    });
+
+    function refreshParentAndClose(){
+        if(parent && typeof parent.__refreshScheduleAdjustTable === 'function'){ parent.__refreshScheduleAdjustTable(false); }
+        if(parent && parent.layer){ var frameIndex = parent.layer.getFrameIndex(window.name); parent.layer.close(frameIndex); }
+    }
+
+    form.on('submit(submit)', function(data){
+        if(submitting){ return false; }
+        submitting = true;
+        var $submitButton = $('#form').find('button[lay-filter="submit"]');
+        $submitButton.addClass('layui-btn-disabled').prop('disabled', true);
+        $.ajax({
+            url: $('#form').attr('action'),
+            type: 'POST',
+            data: data.field,
+            dataType: 'json',
+            success: function(res){
+                if(res && res.code === 1){ layer.msg(res.msg || '保存成功', {icon:1}, function(){ refreshParentAndClose(); }); }
+                else { layer.msg((res && res.msg) || '保存失败', {icon:2}); }
+            },
+            error: function(){ layer.msg('保存失败', {icon:2}); },
+            complete: function(){ submitting = false; $submitButton.removeClass('layui-btn-disabled').prop('disabled', false); }
+        });
+        return false;
+    });
+});
+</script>

@@ -1,0 +1,197 @@
+{layout name="layout/main" /}
+<div class="layui-card">
+    <div class="layui-card-header">
+        <h3 class="layui-card-title">学生签到</h3>
+    </div>
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane">
+            <div class="layui-form-item">
+                <label class="layui-form-label">选择班级 <span class="layui-form-must">*</span></label>
+                <div class="layui-input-block">
+                    <select name="class_id" id="class_id" lay-verify="required" lay-filter="class">
+                        <option value="">请选择班级</option>
+                        {{volist name='classList' id='class'}}
+                        <option value="{{class.id}}">{{class.class_name}}</option>
+                        {{/volist}}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="layui-form-item">
+                <label class="layui-form-label">选择课时 <span class="layui-form-must">*</span></label>
+                <div class="layui-input-block">
+                    <select name="hour_id" id="hour_id" lay-verify="required">
+                        <option value="">请先选择班级</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="layui-form-item">
+                <label class="layui-form-label">签到日期</label>
+                <div class="layui-input-block">
+                    <input type="date" name="sign_date" value="{{date('Y-m-d')}}" class="layui-input" required lay-verify="required">
+                </div>
+            </div>
+        </form>
+        
+        <div class="layui-card" style="margin-top: 20px;">
+            <div class="layui-card-header">
+                <h3 class="layui-card-title">学生列表</h3>
+                <div class="layui-card-header-right">
+                    <button class="layui-btn layui-btn-sm layui-btn-normal" lay-event="signAll">
+                        <i class="layui-icon layui-icon-user"></i> 全部签到
+                    </button>
+                    <button class="layui-btn layui-btn-sm layui-btn-danger" lay-event="cancelAll">
+                        <i class="layui-icon layui-icon-close"></i> 取消全部
+                    </button>
+                </div>
+            </div>
+            <div class="layui-card-body">
+                <table class="layui-hide" id="studentTable" lay-filter="studentTable"></table>
+            </div>
+        </div>
+        
+        <div class="layui-form-item" style="margin-top: 20px;">
+            <div class="layui-input-block">
+                <button type="button" class="layui-btn layui-btn-normal" id="submitSign">
+                    <i class="layui-icon layui-icon-save"></i> 确认签到
+                </button>
+                <button type="button" class="layui-btn layui-btn-primary" onclick="parent.layer.closeAll()">
+                    <i class="layui-icon layui-icon-close"></i> 取消
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/html" id="signStatus">
+    {{# if(d.is_signed){ }}
+    <input type="checkbox" name="sign" value="{{d.id}}" lay-skin="primary" title="" checked>
+    {{# } else { }}
+    <input type="checkbox" name="sign" value="{{d.id}}" lay-skin="primary" title="">
+    {{# } }}
+</script>
+<script>
+    layui.use(['table', 'form', 'layer'], function() {
+        var table = layui.table;
+        var form = layui.form;
+        var layer = layui.layer;
+        
+        form.render();
+        
+        // 监听班级选择
+        form.on('select(class)', function(data) {
+            var classId = data.value;
+            if (classId) {
+                // 加载该班级的课时
+                $.get('{:__u("edu/class_hour/getClassHours")}', {class_id: classId}, function(res) {
+                    if (res.code === 1) {
+                        var html = '<option value="">请选择课时</option>';
+                        $.each(res.data, function(index, item) {
+                            html += '<option value="' + item.id + '">' + item.class_date + ' ' + item.class_time + '</option>';
+                        });
+                        $('#hour_id').html(html);
+                        form.render('select');
+                    }
+                }, 'json');
+            } else {
+                $('#hour_id').html('<option value="">请先选择班级</option>');
+                form.render('select');
+            }
+        });
+        
+        // 监听课时选择
+        form.on('select(hour_id)', function(data) {
+            var hourId = data.value;
+            if (hourId) {
+                // 加载学生列表
+                loadStudents(hourId);
+            }
+        });
+        
+        // 加载学生列表
+        function loadStudents(hourId) {
+            table.render({
+                elem: '#studentTable',
+                url: '{:__u("edu/class_hour/getStudents")}',
+                where: {hour_id: hourId},
+                cols: [[
+                    {type: 'checkbox'},
+                    {field: 'id', title: 'ID', width: 80},
+                    {field: 'student_no', title: '学号', width: 120},
+                    {field: 'name', title: '姓名', width: 100},
+                    {field: 'gender', title: '性别', width: 80, templet: function(d) {
+                        return d.gender == 1 ? '男' : '女';
+                    }},
+                    {field: 'total_hours', title: '总课时', width: 80},
+                    {field: 'used_hours', title: '已用课时', width: 80},
+                    {field: 'remaining_hours', title: '剩余课时', width: 80},
+                    {field: 'is_signed', title: '签到', width: 80, templet: '#signStatus'}
+                ]],
+                page: true,
+                limit: 20,
+                limits: [20, 50, 100],
+                text: {
+                    none: '暂无学生数据'
+                }
+            });
+        }
+        
+        // 全部签到
+        $('[lay-event="signAll"]').on('click', function() {
+            $('input[name="sign"]').prop('checked', true);
+            form.render('checkbox');
+        });
+        
+        // 取消全部
+        $('[lay-event="cancelAll"]').on('click', function() {
+            $('input[name="sign"]').prop('checked', false);
+            form.render('checkbox');
+        });
+        
+        // 确认签到
+        $('#submitSign').on('click', function() {
+            var classId = $('#class_id').val();
+            var hourId = $('#hour_id').val();
+            var signDate = $('input[name="sign_date"]').val();
+            var studentIds = [];
+            
+            $('input[name="sign"]:checked').each(function() {
+                studentIds.push($(this).val());
+            });
+            
+            if (!classId) {
+                layer.msg('请选择班级', {icon: 2});
+                return;
+            }
+            
+            if (!hourId) {
+                layer.msg('请选择课时', {icon: 2});
+                return;
+            }
+            
+            if (studentIds.length === 0) {
+                layer.msg('请选择要签到的学生', {icon: 2});
+                return;
+            }
+            
+            layer.confirm('确定要为选中的学生签到吗？签到后将自动扣减课时', function(index) {
+                $.post('{:__u("edu/class_hour/doSign")}', {
+                    class_id: classId,
+                    hour_id: hourId,
+                    sign_date: signDate,
+                    student_ids: studentIds
+                }, function(res) {
+                    if (res.code === 1) {
+                        layer.msg(res.msg, {icon: 1}, function() {
+                            parent.layer.closeAll();
+                            parent.layui.table.reload('table');
+                        });
+                    } else {
+                        layer.msg(res.msg, {icon: 2});
+                    }
+                }, 'json');
+                layer.close(index);
+            });
+        });
+    });
+</script>

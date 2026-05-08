@@ -1,0 +1,322 @@
+{layout name="layout/main" /}
+<style>
+    #table + .layui-table-view .layui-table-tool-temp {
+        display: flex;
+        align-items: flex-end;
+        gap: 8px;
+        flex-wrap: wrap;
+        padding-right: 0;
+    }
+
+    #table + .layui-table-view .layui-table-tool-self {
+        position: static;
+        float: none;
+        margin: 0;
+        display: inline-flex;
+        align-items: flex-end;
+        align-self: flex-end;
+    }
+
+    #table + .layui-table-view .layui-table-tool-self .layui-inline {
+        margin: 0;
+    }
+
+    #table + .layui-table-view .layui-table-tool-self .layui-btn-container {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+    }
+
+    #table + .layui-table-view .layui-table-tool-self .layui-btn-container > * + * {
+        margin-left: 8px;
+    }
+
+    #table + .layui-table-view .layui-table-tool-self .layui-inline + .layui-inline,
+    #table + .layui-table-view .layui-table-tool-self .layui-btn + .layui-btn {
+        margin-left: 8px;
+    }
+
+    #table + .layui-table-view .layui-table-tool-self .layui-btn {
+        height: 30px;
+        line-height: 30px;
+        padding: 0 10px;
+        margin: 0;
+    }
+
+    #table + .layui-table-view .layui-table-tool-self .layui-btn .layui-icon {
+        margin-right: 4px;
+    }
+
+    .table-batch-delete-disabled {
+        opacity: .45;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    .table-action-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: nowrap;
+    }
+
+    .table-action-group .layui-btn {
+        margin: 0;
+    }
+
+    @media (max-width: 768px) {
+        .contact-filter-btn {
+            flex: 1 1 calc(50% - 8px);
+        }
+    }
+</style>
+<div class="layui-card">
+    <div class="layui-card-header">
+        <h3 class="layui-card-title">校区联系薄</h3>
+    </div>
+    <div class="layui-card-body">
+        <div class="layui-form layui-form-pane" lay-filter="contact-search">
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">搜索</label>
+                    <div class="layui-input-inline">
+                        <input type="text" name="keyword" placeholder="请输入姓名、电话或邮箱" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <button class="layui-btn layui-btn-primary" lay-submit lay-filter="search">
+                        <i class="layui-icon layui-icon-search"></i> 搜索
+                    </button>
+                    <button class="layui-btn layui-btn-primary" lay-submit lay-filter="reset">
+                        <i class="layui-icon layui-icon-refresh"></i> 重置
+                    </button>
+                </div>
+            </div>
+        </div>
+        <table class="layui-hide" id="table" lay-filter="table"></table>
+    </div>
+</div>
+<script type="text/html" id="toolbar">
+    <div class="layui-btn-container contact-toolbar-wrap">
+        <button class="layui-btn layui-btn-sm" id="addContactBtn" type="button">
+            <i class="layui-icon layui-icon-add-circle"></i> 添加联系人
+        </button>
+        <button class="layui-btn layui-btn-sm layui-btn-normal" id="importContactBtn" type="button" data-url="/backend/edu/campus_contact/add?import_mode=1">
+            <i class="layui-icon layui-icon-upload-drag"></i> 批量导入
+        </button>
+        <button class="layui-btn layui-btn-sm layui-btn-danger table-batch-delete-disabled" lay-event="batchDelete" id="campusContactBatchDeleteBtn" type="button">
+            <i class="layui-icon layui-icon-delete"></i> 批量删除
+        </button>
+        <button type="button" class="layui-btn layui-btn-sm contact-filter-btn is-active" data-position="1">校区领导</button>
+        <button type="button" class="layui-btn layui-btn-sm contact-filter-btn" data-position="2">本部老师</button>
+        <button type="button" class="layui-btn layui-btn-sm contact-filter-btn" data-position="3">兼职老师</button>
+    </div>
+</script>
+<script type="text/html" id="genderTpl">
+    {{# if(d.gender == 1){ }}
+    <span class="layui-badge-rim">男</span>
+    {{# } else { }}
+    <span class="layui-badge-rim">女</span>
+    {{# } }}
+</script>
+<script type="text/html" id="positionTpl">
+    {{# if(d.position == 1){ }}
+    <span class="layui-badge layui-bg-orange">校区领导</span>
+    {{# } else if(d.position == 2) { }}
+    <span class="layui-badge layui-bg-green">本部老师</span>
+    {{# } else { }}
+    <span class="layui-badge layui-bg-blue">兼职老师</span>
+    {{# } }}
+</script>
+<script type="text/html" id="action">
+    <button class="layui-btn layui-btn-xs" lay-event="view">查看</button>
+    <button class="layui-btn layui-btn-xs layui-btn-normal" lay-event="edit">编辑</button>
+    <button class="layui-btn layui-btn-xs layui-btn-danger" lay-event="delete">删除</button>
+</script>
+<script>
+    layui.use(['table', 'form', 'layer'], function() {
+        var table = layui.table;
+        var form = layui.form;
+        var layer = layui.layer;
+        var $ = layui.$;
+        var tableId = 'CampusContactTable';
+        var currentPosition = 1;
+        var positionTextMap = {
+            1: '校区领导',
+            2: '本部老师',
+            3: '兼职老师'
+        };
+
+        function relocateDefaultToolbar() {
+            var $tableView = $('#table').next('.layui-table-view');
+            var $toolbar = $tableView.find('.layui-table-tool-self');
+            var $anchor = $tableView.find('.contact-filter-btn').last();
+            if (!$tableView.length || !$toolbar.length || !$anchor.length) {
+                return;
+            }
+            $toolbar.insertAfter($anchor);
+        }
+
+        function getWhere(extra) {
+            return $.extend({}, {
+                keyword: $('input[name="keyword"]').val() || '',
+                position: currentPosition,
+                _t: new Date().getTime()
+            }, extra || {});
+        }
+
+        function setActivePosition(position) {
+            currentPosition = parseInt(position, 10) || 1;
+            $('.contact-filter-btn').removeClass('is-active');
+            $('.contact-filter-btn[data-position="' + currentPosition + '"]').addClass('is-active');
+        }
+
+        function getEmptyText() {
+            return '暂无数据';
+        }
+
+        function reloadTable(resetPage) {
+            table.reload(tableId, {
+                where: getWhere(),
+                page: resetPage ? {curr: 1} : undefined,
+                text: {none: getEmptyText()}
+            });
+        }
+
+        function openForm(title, url, area) {
+            layer.open({
+                type: 2,
+                title: title,
+                content: url,
+                area: area || ['760px', '680px'],
+                maxmin: true,
+                shadeClose: false,
+                end: function() {
+                    reloadTable(false);
+                }
+            });
+        }
+
+        function updateBatchDeleteButtonState() {
+            var selected = table.checkStatus(tableId).data || [];
+            $('#campusContactBatchDeleteBtn').toggleClass('table-batch-delete-disabled', !selected.length);
+        }
+
+        function deleteItems(ids, done, options) {
+            options = options || {};
+            $.post('/backend/edu/campus_contact/delete', {ids: ids.join(',')}, function(res) {
+                if (res.code === 1) {
+                    layer.msg(options.successText || res.msg || '删除成功', {icon: 1}, function() {
+                        reloadTable(false);
+                        updateBatchDeleteButtonState();
+                        if (typeof done === 'function') done(true);
+                    });
+                } else {
+                    layer.msg((res && res.msg) || '删除失败', {icon: 2});
+                    if (typeof done === 'function') done(false);
+                }
+            }, 'json').fail(function() {
+                layer.msg('删除失败，请稍后重试', {icon: 2});
+                if (typeof done === 'function') done(false);
+            });
+        }
+
+        table.render({
+            elem: '#table',
+            id: tableId,
+            url: '/backend/edu/campus_contact/index',
+            where: getWhere(),
+            toolbar: '#toolbar',
+            defaultToolbar: ['filter', 'exports', 'print'],
+            cols: [[
+                {type: 'checkbox'},
+                {field: 'id', title: 'ID', width: 80},
+                {field: 'name', title: '姓名', width: 120},
+                {field: 'gender', title: '性别', width: 80, templet: '#genderTpl'},
+                {field: 'position', title: '标签', width: 110, templet: '#positionTpl'},
+                {field: 'phone', title: '电话', width: 150},
+                {field: 'email', title: '邮箱', minWidth: 200},
+                {field: 'remark', title: '备注', minWidth: 220},
+                {field: 'create_time', title: '添加时间', width: 170},
+                {field: 'update_time', title: '更新时间', width: 170},
+                {toolbar: '#action', title: '操作', width: 180, fixed: 'right'}
+            ]],
+            page: true,
+            limit: 10,
+            limits: [10, 20, 30, 50],
+            text: {none: getEmptyText()},
+            done: function() {
+                updateBatchDeleteButtonState();
+                relocateDefaultToolbar();
+                $('#addContactBtn').off('click').on('click', function() {
+                    openForm('添加联系人', '/backend/edu/campus_contact/add?position=' + currentPosition);
+                });
+
+                $('#importContactBtn').off('click').on('click', function() {
+                    openForm('批量导入联系人', $(this).data('url') || '/backend/edu/campus_contact/add?import_mode=1', ['760px', '520px']);
+                });
+
+                $('.contact-filter-btn').off('click').on('click', function() {
+                    setActivePosition($(this).data('position'));
+                    reloadTable(true);
+                });
+            }
+        });
+
+        table.on('toolbar(table)', function(obj) {
+            if (obj.event === 'batchDelete') {
+                var selected = table.checkStatus(tableId).data || [];
+                if (!selected.length) {
+                    updateBatchDeleteButtonState();
+                    return;
+                }
+                var ids = selected.map(function(item) { return item.id; });
+                layer.confirm('确定要批量删除选中的 ' + ids.length + ' 个联系人吗？', function(index) {
+                    deleteItems(ids, function() {
+                        layer.close(index);
+                    }, {successText: '已删除 ' + ids.length + ' 条数据'});
+                });
+            }
+        });
+
+        table.on('checkbox(table)', function() {
+            updateBatchDeleteButtonState();
+        });
+
+        table.on('tool(table)', function(obj) {
+            var event = obj.event;
+            var data = obj.data;
+            if (event === 'view') {
+                openForm('查看联系人', '/backend/edu/campus_contact/view?id=' + data.id);
+            } else if (event === 'edit') {
+                openForm('编辑联系人', '/backend/edu/campus_contact/edit?id=' + data.id);
+            } else if (event === 'delete') {
+                layer.confirm('确定要删除这个联系人吗？', function(index) {
+                    deleteItems([data.id], function() {
+                        layer.close(index);
+                    });
+                });
+            }
+        });
+
+        form.on('submit(search)', function(data) {
+            table.reload(tableId, {
+                where: getWhere(data.field),
+                page: {curr: 1},
+                text: {none: getEmptyText()}
+            });
+            return false;
+        });
+
+        form.on('submit(reset)', function() {
+            form.val('contact-search', {keyword: ''});
+            reloadTable(true);
+            return false;
+        });
+
+        window.__refreshCampusContactTable = function(resetPage) {
+            reloadTable(!!resetPage);
+        };
+    });
+</script>

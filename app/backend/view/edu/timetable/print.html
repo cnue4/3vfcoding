@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <title>课程表打印版</title>
+    <style>
+        body{font-family:"Microsoft YaHei",sans-serif;background:#f5f7fb;color:#1f2937;margin:0;padding:24px}
+        .wrap{max-width:1400px;margin:0 auto}
+        .header{margin-bottom:20px}
+        .title{font-size:30px;font-weight:800;margin:0 0 8px}
+        .meta{color:#64748b;font-size:14px}
+        .summary,.today,.conflicts,.week{background:#fff;border:1px solid #e5ebf5;border-radius:16px;padding:18px;margin-bottom:18px}
+        .grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+        .box{border:1px solid #e5ebf5;border-radius:12px;padding:14px;background:#fafcff}
+        .label{font-size:13px;color:#64748b}.value{margin-top:8px;font-size:28px;font-weight:800}
+        .conflict-item{padding:10px 12px;border-radius:10px;border:1px solid #fecaca;background:#fff5f5;margin-bottom:10px}.conflict-item:last-child{margin-bottom:0}
+        .week-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:12px}.day{border:1px solid #e5ebf5;border-radius:14px;overflow:hidden;background:#fcfdff}.day-hd{padding:12px 14px;border-bottom:1px solid #e5ebf5;background:#f8fbff;font-weight:700}.day-bd{padding:12px;display:grid;gap:10px;min-height:180px}
+        .lesson{border:1px solid #dbe6f5;border-radius:12px;background:#fff;padding:10px}.lesson.conflict{border-color:#fca5a5;background:#fff1f2}.time{display:inline-block;padding:3px 8px;border-radius:999px;background:#eef4ff;color:#2563eb;font-size:12px;font-weight:700}.lesson.conflict .time{background:#ffe4e6;color:#ef4444}.name{margin-top:8px;font-size:15px;font-weight:700}.meta2{margin-top:6px;font-size:12px;color:#64748b;line-height:1.7}.empty{color:#94a3b8;font-size:13px;text-align:center;padding:28px 0}
+        .print-btn{margin-bottom:16px;padding:10px 16px;border:none;border-radius:10px;background:#2563eb;color:#fff;font-size:14px;cursor:pointer}
+        @media print{body{background:#fff;padding:0}.print-btn{display:none}.summary,.today,.conflicts,.week{border-color:#d1d5db;box-shadow:none;break-inside:avoid}.wrap{max-width:none}.week-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <button class="print-btn" onclick="window.print()">打印当前课程表</button>
+    <div class="header">
+        <h1 class="title">课程表打印版</h1>
+        <div class="meta">教师：{$teacher.username|default=''} {if !empty($teacher.realname)}（{$teacher.realname|default=''}）{/if}　|　邮箱：{$teacher.email|default='未填写'}　|　电话：{$teacher.mobile|default='未填写'}</div>
+    </div>
+
+    <div class="today">
+        <div style="font-size:18px;font-weight:700;margin-bottom:12px;">今日课程提醒 · {$todaySummary.weekday_name|default='今天'}</div>
+        <div class="grid3">
+            <div class="box"><div class="label">今天共几节课</div><div class="value">{$todaySummary.total_classes|default='0'}</div></div>
+            <div class="box"><div class="label">第一节几点开始</div><div class="value">{$todaySummary.first_start_time|default='暂无'}</div></div>
+            <div class="box"><div class="label">最后一节几点结束</div><div class="value">{$todaySummary.last_end_time|default='暂无'}</div></div>
+        </div>
+    </div>
+
+    <div class="summary">
+        <div class="grid3">
+            <div class="box"><div class="label">本周排课班级数</div><div class="value">{$summary.total_classes|default='0'}</div></div>
+            <div class="box"><div class="label">冲突班级数</div><div class="value">{$summary.conflict_classes|default='0'}</div></div>
+            <div class="box"><div class="label">正常班级数</div><div class="value">{$summary.normal_classes|default='0'}</div></div>
+        </div>
+    </div>
+
+    <div class="conflicts">
+        <div style="font-size:18px;font-weight:700;margin-bottom:12px;">冲突检测</div>
+        {if !empty($conflicts)}
+        {volist name="conflicts" id="item"}
+        <div class="conflict-item">{$item.class_name|default=''}　/　{$item.weekday_name|default=''} {$item.time_range|default=''}　/　{$item.course_name|default=''}　/　{$item.classroom|default=''}　/　时间冲突</div>
+        {/volist}
+        {else /}
+        <div style="color:#15803d;">当前老师课程表没有发现时间冲突。</div>
+        {/if}
+    </div>
+
+    <div class="week">
+        <div style="font-size:18px;font-weight:700;margin-bottom:12px;">周课程表</div>
+        <div class="week-grid">
+            {volist name="days" id="day"}
+            <div class="day">
+                <div class="day-hd">{$day.weekday_name|default=''}（共 {$day.items|count} 节）</div>
+                <div class="day-bd">
+                    {if !empty($day.items)}
+                    {volist name="day.items" id="lesson"}
+                    <div class="lesson {if !empty($lesson.has_conflict)}conflict{/if}">
+                        <div class="time">{$lesson.time_range|default=''}</div>
+                        <div class="name">{$lesson.class_name|default=''}</div>
+                        <div class="meta2">课程：{$lesson.course_name|default=''}<br>教室：{$lesson.classroom|default=''}<br>人数：{$lesson.current_students|default='0'}/{$lesson.max_students|default='0'}<br>班级编号：{$lesson.class_no|default=''}</div>
+                    </div>
+                    {/volist}
+                    {else /}
+                    <div class="empty">今天没有排课</div>
+                    {/if}
+                </div>
+            </div>
+            {/volist}
+        </div>
+    </div>
+</div>
+</body>
+</html>

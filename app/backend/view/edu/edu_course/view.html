@@ -1,0 +1,89 @@
+{layout name="layout/main" /}
+<div class="layui-card">
+    <div class="layui-card-header">
+        <h3 class="layui-card-title">查看课程</h3>
+    </div>
+    <div class="layui-card-body">
+        <div class="layui-form layui-form-pane">
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">课程名称</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input" value="{$formData['name']|default=''}" readonly>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">课程编号</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input" value="{$formData['course_no']|default=''}" readonly>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">课程分类</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input" value="{$formData['category_name']|default=''}" readonly>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">总课时</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input" value="{$formData['total_hours']|default=''}" readonly>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">课时单价</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input" value="{$formData['unit_price']|default=''}" readonly>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">课程类型</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input" value="{$formData['course_type_text']|default=''}" readonly>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">难度等级</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input" value="{$formData['difficulty_text']|default=''}" readonly>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">状态</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input" value="{$formData['status_text']|default=''}" readonly>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">创建时间</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input" value="{$formData['create_time']|default=''}" readonly>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <label class="layui-form-label">更新时间</label>
+                <div class="layui-input-block">
+                    <input type="text" class="layui-input" value="{$formData['update_time']|default=''}" readonly>
+                </div>
+            </div>
+
+            <div class="layui-form-item">
+                <div class="layui-input-block">
+                    <button type="button" class="layui-btn layui-btn-primary" onclick="parent.layer.closeAll()">
+                        <i class="layui-icon layui-icon-close"></i> 关闭
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

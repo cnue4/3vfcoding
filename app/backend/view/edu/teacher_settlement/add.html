@@ -1,0 +1,114 @@
+{layout name="layout/main" /}
+<style>
+    html, body {height:100%;overflow:auto;background:#f5f7fb;}
+    .teacher-settlement-form-card {min-height:100%;}
+    .teacher-settlement-form-card .layui-card-body {max-height:calc(100vh - 90px);overflow-y:auto;box-sizing:border-box;}
+    @media (max-width:640px) {
+        .teacher-settlement-form-card .layui-form-label {width:auto;float:none;display:block;margin-bottom:8px;}
+        .teacher-settlement-form-card .layui-input-block {margin-left:0;}
+    }
+</style>
+<div class="layui-card teacher-settlement-form-card">
+    <div class="layui-card-header"><h3 class="layui-card-title">{$title}课时结算</h3></div>
+    <div class="layui-card-body">
+        <form class="layui-form layui-form-pane" id="form" action="{if isset($formData['id'])}/backend/edu/teacher_settlement/edit?id={$formData['id']}{else}/backend/edu/teacher_settlement/add{/if}" method="post">
+            <input type="hidden" name="id" value="{$formData['id']|default=''}">
+            <div class="layui-form-item"><label class="layui-form-label">结算单号</label><div class="layui-input-block"><input type="text" value="{if isset($formData['settlement_no'])}{$formData['settlement_no']}{else}保存后自动生成{/if}" class="layui-input" readonly></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">教师</label><div class="layui-input-block"><select name="teacher_id" lay-verify="required"><option value="">请选择教师</option>{volist name="teacherList" id="teacher"}<option value="{$teacher.id}" {if isset($formData['teacher_id']) && (int)$formData['teacher_id']==(int)$teacher['id']}selected{/if}>{$teacher.realname|default=''}{if $teacher.realname && $teacher.username}（{$teacher.username}）{else /}{$teacher.username|default=''}{/if}</option>{/volist}</select></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">结算月份</label><div class="layui-input-block"><input type="month" name="settlement_month" value="{$formData['settlement_month']|default=''}" class="layui-input" lay-verify="required"></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">课时单价</label><div class="layui-input-block"><input type="number" name="hour_price" value="{$formData['hour_price']|default='0'}" class="layui-input" min="0" step="0.01" lay-verify="required"></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">调整课时</label><div class="layui-input-block"><input type="number" name="adjust_hours" value="{$formData['adjust_hours']|default='0'}" class="layui-input" step="0.01"></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">扣减金额</label><div class="layui-input-block"><input type="number" name="deduct_amount" value="{$formData['deduct_amount']|default='0'}" class="layui-input" min="0" step="0.01"></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">奖励金额</label><div class="layui-input-block"><input type="number" name="reward_amount" value="{$formData['reward_amount']|default='0'}" class="layui-input" min="0" step="0.01"></div></div>
+            <div class="layui-form-item"><label class="layui-form-label">结算状态</label><div class="layui-input-block"><select name="settlement_status" lay-verify="required">{volist name="settlementStatusList" id="statusName" key="statusValue"}<option value="{$statusValue}" {if isset($formData['settlement_status']) && (int)$formData['settlement_status']==(int)$statusValue}selected{/if}>{$statusName}</option>{/volist}</select></div></div>
+            <div class="layui-form-item layui-form-text"><label class="layui-form-label">备注</label><div class="layui-input-block"><textarea name="remark" class="layui-textarea" placeholder="请输入备注">{$formData['remark']|default=''}</textarea></div></div>
+            <div class="layui-form-item" style="display:none;"><label class="layui-form-label">状态</label><div class="layui-input-block"><input type="radio" name="status" value="1" title="正常" {if !isset($formData['status']) || (int)$formData['status']==1}checked{/if}><input type="radio" name="status" value="2" title="禁用" {if isset($formData['status']) && (int)$formData['status']==2}checked{/if}></div></div>
+            <div class="layui-form-item"><div class="layui-input-block"><button type="button" class="layui-btn layui-btn-normal" id="saveTeacherSettlementBtn"><i class="layui-icon layui-icon-save"></i> 保存</button><button type="button" class="layui-btn layui-btn-primary" onclick="parent.layer.closeAll()"><i class="layui-icon layui-icon-close"></i> 取消</button></div></div>
+        </form>
+    </div>
+</div>
+<script>
+layui.use(['form','layer','jquery'], function(){
+    var form = layui.form, layer = layui.layer, $ = layui.jquery;
+    var submitting = false;
+    form.render();
+
+    function refreshParentAndClose(){
+        if(parent && typeof parent.__refreshTeacherSettlementTable === 'function'){
+            parent.__refreshTeacherSettlementTable(false);
+        }
+        if(parent && parent.layer){
+            var frameIndex = parent.layer.getFrameIndex(window.name);
+            parent.layer.close(frameIndex);
+        }
+    }
+
+    function parseResponse(raw){
+        if(!raw){ return null; }
+        if(typeof raw === 'object'){ return raw; }
+        var text = $.trim(String(raw));
+        if(!text){ return null; }
+        try {
+            return JSON.parse(text);
+        } catch (e) {}
+
+        var match = text.match(/\{[\s\S]*"code"\s*:\s*[01][\s\S]*\}/);
+        if(match){
+            try {
+                return JSON.parse(match[0]);
+            } catch (e) {}
+        }
+        return null;
+    }
+
+    function handleResponse(res){
+        if(res && Number(res.code) === 1){
+            layer.msg(res.msg || '保存成功', {icon:1}, function(){
+                refreshParentAndClose();
+            });
+            return;
+        }
+        layer.msg((res && res.msg) || '保存失败', {icon:2});
+    }
+
+    $('#saveTeacherSettlementBtn').on('click', function(){
+        if(submitting){ return; }
+        var checkResult = form.validate ? form.validate('#form') : true;
+        if(checkResult === false){
+            return;
+        }
+
+        submitting = true;
+        var $submitButton = $('#saveTeacherSettlementBtn');
+        var selectedTeacherId = Number($('#form').find('select[name="teacher_id"]').val() || 0);
+        if(!selectedTeacherId){
+            layer.msg('请选择教师', {icon:2});
+            return;
+        }
+        $submitButton.addClass('layui-btn-disabled').prop('disabled', true);
+
+        $.ajax({
+            url: $('#form').attr('action'),
+            type:'POST',
+            headers:{'X-Requested-With':'XMLHttpRequest','Accept':'application/json'},
+            data: $('#form').serialize(),
+            dataType:'text',
+            success:function(res){
+                handleResponse(parseResponse(res));
+            },
+            error:function(xhr){
+                var parsed = parseResponse(xhr && xhr.responseText ? xhr.responseText : '');
+                if(parsed && Number(parsed.code) === 1){
+                    handleResponse(parsed);
+                    return;
+                }
+                layer.msg((parsed && parsed.msg) || '保存失败', {icon:2});
+            },
+            complete:function(){
+                submitting = false;
+                $submitButton.removeClass('layui-btn-disabled').prop('disabled', false);
+            }
+        });
+    });
+});
+</script>

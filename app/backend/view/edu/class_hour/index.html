@@ -1,0 +1,60 @@
+{layout name="layout/main" /}
+<style>
+    #table + .layui-table-view .layui-table-tool-temp {
+        display: flex;
+        align-items: flex-end;
+        gap: 8px;
+        flex-wrap: wrap;
+        padding-right: 0;
+    }
+
+    #table + .layui-table-view .layui-table-tool-self {
+        position: static;
+        float: none;
+        margin: 0;
+        display: inline-flex;
+        align-items: flex-end;
+        align-self: flex-end;
+    }
+
+    #table + .layui-table-view .layui-table-tool-self .layui-inline {
+        margin: 0;
+    }
+
+    #table + .layui-table-view .layui-table-tool-self .layui-btn-container {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+    }
+
+    #table + .layui-table-view .layui-table-tool-self .layui-btn-container > * + * {
+        margin-left: 8px;
+    }
+
+    #table + .layui-table-view .layui-table-tool-self .layui-inline + .layui-inline,
+    #table + .layui-table-view .layui-table-tool-self .layui-btn + .layui-btn {
+        margin-left: 8px;
+    }
+
+    #table + .layui-table-view .layui-table-tool-self .layui-btn {
+        height: 30px;
+        line-height: 30px;
+        padding: 0 10px;
+        margin: 0;
+    }
+
+    #table + .layui-table-view .layui-table-tool-self .layui-btn .layui-icon {
+        margin-right: 4px;
+    }
+
+    .table-batch-delete-disabled {
+        opacity: .45;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+</style>
+<div class="layui-card"><div class="layui-card-header"><h3 class="layui-card-title">课时管理</h3></div><div class="layui-card-body"><div class="layui-form layui-form-pane" lay-filter="search"><div class="layui-form-item"><div class="layui-inline"><label class="layui-form-label">搜索</label><div class="layui-input-inline" style="width:260px;"><input type="text" name="keyword" placeholder="请输入班级名称、上课老师、日期或记录编号" class="layui-input"></div></div><div class="layui-inline"><button class="layui-btn layui-btn-primary" lay-submit lay-filter="search">搜索</button><button class="layui-btn layui-btn-primary" lay-submit lay-filter="reset">重置</button></div></div></div><table class="layui-hide" id="table" lay-filter="table"></table></div></div>
+<script type="text/html" id="toolbar"><div class="layui-btn-container"><button class="layui-btn layui-btn-sm" lay-event="add">添加课时</button><button class="layui-btn layui-btn-sm layui-btn-danger table-batch-delete-disabled" lay-event="batchDelete" id="classHourBatchDeleteBtn">批量删除</button></div></script>
+<script type="text/html" id="action"><div class="table-action-group"><button class="layui-btn layui-btn-xs layui-btn-normal" lay-event="edit">编辑</button><button class="layui-btn layui-btn-xs layui-btn-danger" lay-event="delete">删除</button></div></script>
+<script>layui.use(['table','form','layer'],function(){var table=layui.table,form=layui.form,layer=layui.layer,tableId='ClassHourTable';function relocateDefaultToolbar(){var $tableView=$('#table').next('.layui-table-view');var $toolbar=$tableView.find('.layui-table-tool-self');var $anchor=$('#classHourBatchDeleteBtn');if(!$tableView.length||!$toolbar.length||!$anchor.length){return;}$toolbar.insertAfter($anchor);}function reload(reset,where){table.reload(tableId,{page:reset?{curr:1}:undefined,where:where||undefined});}function openForm(title,url){layer.open({type:2,title:title,content:url,area:['980px','760px'],maxmin:true,end:function(){reload(false);updateBatchDeleteButtonState();}});}function updateBatchDeleteButtonState(){var selected=table.checkStatus(tableId).data||[];$('#classHourBatchDeleteBtn').toggleClass('table-batch-delete-disabled',!selected.length);}function deleteItems(ids,done,options){options=options||{};$.post('/backend/edu/class_hour/delete',{ids:ids.join(',')},function(res){if(res.code===1){layer.msg(options.successText||res.msg||'删除成功',{icon:1},function(){reload(false);updateBatchDeleteButtonState();if(typeof done==='function')done(true);});}else{layer.msg((res&&res.msg)||'删除失败',{icon:2});if(typeof done==='function')done(false);}},'json').fail(function(){layer.msg('删除失败，请稍后重试',{icon:2});if(typeof done==='function')done(false);});}table.render({elem:'#table',id:tableId,url:'/backend/edu/class_hour/index',toolbar:'#toolbar',cols:[[{type:'checkbox'},{field:'record_no',title:'课时记录编号',minWidth:170},{field:'class_name',title:'班级名称',minWidth:160},{field:'teacher_name',title:'上课老师',width:120},{field:'class_date',title:'上课日期',width:120},{field:'start_time',title:'开始',width:90},{field:'end_time',title:'结束',width:90},{field:'actual_hours',title:'课时',width:90},{field:'attendance_mode_text',title:'扣课模式',width:110},{field:'leave_student_names',title:'请假学生姓名',minWidth:160},{field:'status_text',title:'状态',width:90},{toolbar:'#action',title:'操作',width:140,fixed:'right'}]],page:true,done:function(){updateBatchDeleteButtonState();relocateDefaultToolbar();}});table.on('toolbar(table)',function(obj){if(obj.event==='add'){openForm('添加课时','/backend/edu/class_hour/add');}else if(obj.event==='batchDelete'){var selected=table.checkStatus(tableId).data||[];if(!selected.length){updateBatchDeleteButtonState();return;}var ids=selected.map(function(item){return item.id;});layer.confirm('确定要批量删除选中的 '+ids.length+' 条课时记录吗？',function(index){deleteItems(ids,function(){layer.close(index);},{successText:'已删除 '+ids.length+' 条数据'});});}});table.on('checkbox(table)',function(){updateBatchDeleteButtonState();});table.on('tool(table)',function(obj){var d=obj.data;if(obj.event==='edit'){openForm('编辑课时','/backend/edu/class_hour/edit?id='+d.id);}if(obj.event==='delete'){layer.confirm('确定删除吗？',function(i){deleteItems([d.id],function(){layer.close(i);});});}});form.on('submit(search)',function(data){reload(true,data.field);return false;});form.on('submit(reset)',function(){form.val('search',{keyword:''});reload(true,{});return false;});window.__refreshClassHourTable=function(resetPage){reload(!!resetPage);};});</script>

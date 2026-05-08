@@ -1,0 +1,96 @@
+{layout name="layout/main" /}
+<div class="layui-card">
+    <div class="layui-card-header"><h3 class="layui-card-title">学生考勤</h3></div>
+    <div class="layui-card-body">
+        <div class="layui-form layui-form-pane" lay-filter="search">
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">关键词</label>
+                    <div class="layui-input-inline" style="width:280px;">
+                        <input type="text" name="keyword" placeholder="单号 / 班级 / 学生 / 教师 / 备注" class="layui-input">
+                    </div>
+                </div>
+                <div class="layui-inline">
+                    <button class="layui-btn layui-btn-primary" lay-submit lay-filter="search"><i class="layui-icon layui-icon-search"></i> 搜索</button>
+                    <button class="layui-btn layui-btn-primary" lay-submit lay-filter="reset"><i class="layui-icon layui-icon-refresh"></i> 重置</button>
+                </div>
+            </div>
+        </div>
+        <table class="layui-hide" id="table" lay-filter="table"></table>
+    </div>
+</div>
+<script type="text/html" id="toolbar">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm" lay-event="add"><i class="layui-icon layui-icon-add-circle"></i> 添加考勤</button>
+    </div>
+</script>
+<script type="text/html" id="attendance_status_tpl">
+    {{# if(d.attendance_status == 1){ }}<span class="layui-badge layui-bg-green">到课</span>{{# } }}
+    {{# if(d.attendance_status == 2){ }}<span class="layui-badge layui-bg-orange">请假</span>{{# } }}
+    {{# if(d.attendance_status == 3){ }}<span class="layui-badge layui-bg-red">缺勤</span>{{# } }}
+    {{# if(d.attendance_status == 4){ }}<span class="layui-badge layui-bg-blue">补课</span>{{# } }}
+    {{# if(d.attendance_status == 5){ }}<span class="layui-badge">迟到</span>{{# } }}
+    {{# if(d.attendance_status == 6){ }}<span class="layui-badge layui-bg-cyan">早退</span>{{# } }}
+</script>
+<script type="text/html" id="action">
+    <div class="layui-btn-group">
+        <button class="layui-btn layui-btn-xs" lay-event="view"><i class="layui-icon layui-icon-eye"></i> 查看</button>
+        <button class="layui-btn layui-btn-xs layui-btn-normal" lay-event="edit"><i class="layui-icon layui-icon-edit"></i> 编辑</button>
+        <button class="layui-btn layui-btn-xs layui-btn-danger" lay-event="delete"><i class="layui-icon layui-icon-delete"></i> 删除</button>
+    </div>
+</script>
+<script>
+layui.use(['table','form','layer'], function(){
+    var table = layui.table, form = layui.form, layer = layui.layer;
+    var tableId = 'AttendanceTable';
+
+    function reloadTable(resetPage){ table.reload(tableId, resetPage ? {page:{curr:1}} : {}); }
+    function openForm(title, url){ layer.open({type:2,title:title,content:url,area:['980px','760px'],maxmin:true,shadeClose:false,end:function(){reloadTable(false);}}); }
+
+    table.render({
+        elem:'#table',
+        id:tableId,
+        url:'/backend/edu/attendance/index',
+        toolbar:'#toolbar',
+        defaultToolbar:['filter','exports','print'],
+        cols:[[ 
+            {field:'id', title:'ID', width:70},
+            {field:'attendance_no', title:'考勤单号', width:140},
+            {field:'attendance_date', title:'考勤日期', width:110},
+            {field:'class_name', title:'班级', width:140},
+            {field:'student_name', title:'学生', width:110},
+            {field:'teacher_name', title:'教师', width:110},
+            {field:'attendance_status', title:'状态', width:90, templet:'#attendance_status_tpl'},
+            {field:'minutes_late', title:'迟到(分)', width:90},
+            {field:'minutes_leave_early', title:'早退(分)', width:90},
+            {field:'deduct_hours', title:'扣减课时', width:100},
+            {field:'remark', title:'备注', minWidth:220},
+            {toolbar:'#action', title:'操作', width:180, fixed:'right'}
+        ]],
+        page:true,
+        limit:10,
+        limits:[10,20,30,50],
+        text:{none:'暂无考勤记录'}
+    });
+
+    table.on('toolbar(table)', function(obj){ if(obj.event === 'add'){ openForm('添加考勤', '/backend/edu/attendance/add'); } });
+    table.on('tool(table)', function(obj){
+        var data = obj.data;
+        if(obj.event === 'view'){ openForm('查看考勤', '/backend/edu/attendance/view?id=' + data.id); }
+        if(obj.event === 'edit'){ openForm('编辑考勤', '/backend/edu/attendance/edit?id=' + data.id); }
+        if(obj.event === 'delete'){
+            layer.confirm('确定删除这条考勤记录吗？', function(index){
+                $.post('/backend/edu/attendance/delete', {id:data.id}, function(res){
+                    if(res.code === 1){ layer.msg(res.msg,{icon:1},function(){reloadTable(false);}); }
+                    else { layer.msg(res.msg,{icon:2}); }
+                }, 'json');
+                layer.close(index);
+            });
+        }
+    });
+
+    form.on('submit(search)', function(data){ table.reload(tableId, {where:data.field, page:{curr:1}}); return false; });
+    form.on('submit(reset)', function(){ form.val('search', {keyword:''}); table.reload(tableId, {where:{}, page:{curr:1}}); return false; });
+    window.__refreshAttendanceTable = function(resetPage){ reloadTable(!!resetPage); };
+});
+</script>
